@@ -30,7 +30,12 @@
 
 				<ul class="nav nav-pills">
 					<li class="nav-item">
-						<a href="#" class="nav-link active" aria-current="page">Home</a>
+						<button type="button" class="nav-link active" onClick="hideShow()">
+							Toggle Hero Section
+						</button>
+					</li>
+					<li class="nav-item">
+						<a href="#" class="nav-link" aria-current="page">Home</a>
 					</li>
 					<li class="nav-item"><a href="#" class="nav-link">Features</a></li>
 					<li class="nav-item"><a href="#" class="nav-link">Pricing</a></li>
@@ -41,7 +46,7 @@
 		</div>
 
 		<!-- Hero -->
-		<div class="px-4 py-5 my-5 text-center">
+		<div class="px-4 py-5 my-5 text-center hero" id="hero">
 			<img
 				class="d-block mx-auto mb-4"
 				src="https://placecats.com/300/200"
@@ -108,5 +113,6 @@
 			integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
 			crossorigin="anonymous"
 		></script>
+		<script src="script.js"></script>
 	</body>
 </html>
