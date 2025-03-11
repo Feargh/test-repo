@@ -68,6 +68,7 @@
 						required iFrames.
 					</p>
 					<div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+						<!-- Turn2us Portal -->
 						<button
 							type="button"
 							class="btn btn-primary btn-lg px-4 gap-3"
@@ -75,6 +76,8 @@
 						>
 							Turn2us Branded
 						</button>
+
+						<!-- Form to pick your own portal -->
 						<form onsubmit="return addiFrame(event)">
 							<label for="portalId">Add portal ID:</label>
 							<input
@@ -111,10 +114,44 @@
 								<input type="radio" id="uat" name="environment" value="uat" />
 								<label for="uat">UAT</label><br />
 							</fieldset>
+							<fieldset>
+								<h3>Testing:</h3>
+								<input
+									type="radio"
+									id="testing-true"
+									name="testing"
+									value="true"
+								/>
+								<label for="testing-true">True</label><br />
+
+								<input
+									type="radio"
+									id="testing-false"
+									name="testing"
+									value="false"
+								/>
+								<label for="testing-false">False</label><br />
+							</fieldset>
 							<input
 								class="btn btn-success btn-sm px-4"
 								type="submit"
-								value="Add"
+								value="Add Portal"
+							/>
+						</form>
+
+						<!-- Submnit portal URL -->
+						<form onsubmit="return addiFrameURL(event)">
+							<label for="portalId">Insert Portal URL:</label>
+							<input
+								type="text"
+								name="portalURL"
+								id="portalURL"
+								placeholder="Insert Portal URL"
+							/>
+							<input
+								class="btn btn-success btn-sm px-4"
+								type="submit"
+								value="Add URL"
 							/>
 						</form>
 					</div>

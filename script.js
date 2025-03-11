@@ -26,37 +26,29 @@ function hideShow(elementId) {
 // 		event.preventDefault();
 // 	});
 
-function addiFrame(event) {
-	console.log("addiFrame function called.");
-	event.preventDefault();
+function createiFrame(URL, id = "", environment = "") {
+	// if (URL.contains("?_ga=")) {
+	// 	URL = URL.split("?_ga=")[0];
+	// }
 
-	var id = document.getElementById("portalId").value;
+	// if (!URL.contains("?portal=true")) {
+	// 	URL = URL + "?portal=true";
+	// }
+
 	var iframe = document.createElement("iframe");
-
-	// Get the selected environment value
-	const environment = document.querySelector(
-		'input[name="environment"]:checked'
-	).value;
-
-	if (environment === "production") {
-		iframe.src = `https://benefits-calculator.turn2us.org.uk/survey/?portal=true&id=${id}&utm_source=${id}&utm_medium=iFrame&utm_campaign=BCPortal`;
-	}
-	if (environment === "staging") {
-		iframe.src = `https://uat-beta-benefits-calculator.turn2us.org.uk/survey/?portal=true&id=${id}&utm_source=${id}&utm_medium=iFrame&utm_campaign=BCPortal`;
-	}
-	if (environment === "uat") {
-		iframe.src = `https://uat-beta-benefits-calculator.turn2us.org.uk/survey/?portal=true&id=${id}&utm_source=${id}&utm_medium=iFrame&utm_campaign=BCPortal`;
-	}
-	if (environment === "local") {
-		iframe.src = `https://bcv2.turn2us.org.uk:3000/survey/?portal=true&id=${id}&utm_source=${id}&utm_medium=iFrame&utm_campaign=BCPortal`;
-	}
+	iframe.src = URL;
 	iframe.width = "100%";
 	iframe.height = "1399px";
 
 	var container = document.createElement("div");
 	container.classList.add("test-iframe");
 	var heading = document.createElement("h2");
-	heading.textContent = `${id} (${environment})`;
+
+	if (id == "") {
+		heading.textContent = "iFrame";
+	} else {
+		heading.textContent = `${id} (${environment})`;
+	}
 
 	var button = document.createElement("button");
 	button.textContent = "Remove iFrame";
@@ -73,4 +65,46 @@ function addiFrame(event) {
 
 	var iframeContainer = document.getElementById("iframe-container");
 	iframeContainer.appendChild(container);
+}
+
+function newiFrameURL(environment, id, testing) {
+	switch (environment) {
+		case "staging":
+			return `https://staging-beta-benefits-calculator.turn2us.org.uk/survey/?portal=true&id=${id}&test=${testing}`;
+			break;
+		case "uat":
+			return `https://uat-beta-benefits-calculator.turn2us.org.uk/survey/?portal=true&id=${id}&test=${testing}`;
+			break;
+		case "local":
+			return `https://bcv2.turn2us.org.uk:3000/survey/?portal=true&id=${id}&test=${testing}`;
+			break;
+		default: // production
+			return `https://benefits-calculator.turn2us.org.uk/survey/?portal=true&id=${id}&test=${testing}`;
+			break;
+	}
+}
+
+function addiFrame(event) {
+	console.log("addiFrame function called.");
+	event.preventDefault();
+
+	const id = document.getElementById("portalId").value;
+	const environment = document.querySelector(
+		'input[name="environment"]:checked'
+	).value;
+
+	const testing = document.querySelector('input[name="testing"]:checked').value;
+
+	let iframeURL = newiFrameURL(environment, id, testing);
+
+	createiFrame(iframeURL, id, environment);
+}
+
+function addiFrameURL(event) {
+	console.log("addiFrameURL function called.");
+	event.preventDefault();
+
+	var url = document.getElementById("portalURL").value;
+
+	createiFrame(url);
 }
