@@ -85,7 +85,6 @@ function newiFrameURL(environment, id, testing) {
 }
 
 function addiFrame(event) {
-	console.log("addiFrame function called.");
 	event.preventDefault();
 
 	const id = document.getElementById("portalId").value;
@@ -101,10 +100,9 @@ function addiFrame(event) {
 }
 
 function addiFrameURL(event) {
-	console.log("addiFrameURL function called.");
 	event.preventDefault();
 
-	var url = document.getElementById("portalURL").value;
+	var url = document.getElementById("portalURL").value + "&portal=true";
 
 	createiFrame(url);
 }
