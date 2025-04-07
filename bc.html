@@ -68,25 +68,59 @@
 						required iFrames.
 					</p>
 					<div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-						<!-- Turn2us Portal -->
-						<button
-							type="button"
-							class="btn btn-primary btn-lg px-4 gap-3"
-							onClick="hideShow('t2u-iframe')"
-						>
-							Turn2us Branded
-						</button>
+						<div>
+							<!-- Turn2us Portal -->
+							<button
+								type="button"
+								class="btn btn-primary btn-lg px-4 gap-3"
+								onClick="hideShow('t2u-iframe')"
+							>
+								Toggle Turn2us Branded Portal
+							</button>
+
+							<!-- Submit portal URL -->
+							<form class="m-2" onsubmit="return addiFrameURL(event)">
+								<h2>Create portal from existing URL:</h2>
+								<fieldset>
+									<label
+										class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+										for="portalURL"
+										>Insert Portal URL:</label
+									>
+									<input
+										type="text"
+										name="portalURL"
+										id="portalURL"
+										placeholder="Insert Portal URL"
+									/>
+								</fieldset>
+								<input
+									class="btn btn-success btn-sm px-4"
+									type="submit"
+									value="Add URL"
+								/>
+							</form>
+						</div>
 
 						<!-- Form to pick your own portal -->
-						<form onsubmit="return addiFrame(event)">
-							<label for="portalId">Add portal ID:</label>
-							<input
-								type="text"
-								name="portalId"
-								id="portalId"
-								placeholder="Enter portal ID"
-							/>
+						<form class="m-2" onsubmit="return addiFrame(event)">
+							<h2>Create a new portal:</h2>
 							<fieldset>
+								<label
+									class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+									for="portalId"
+									>Add portal ID:</label
+								>
+								<input
+									class=""
+									type="text"
+									name="portalId"
+									id="portalId"
+									placeholder="Enter portal ID"
+								/>
+							</fieldset>
+							<fieldset>
+								<h3>Environment:</h3>
 								<input
 									type="radio"
 									id="production"
@@ -136,22 +170,6 @@
 								class="btn btn-success btn-sm px-4"
 								type="submit"
 								value="Add Portal"
-							/>
-						</form>
-
-						<!-- Submnit portal URL -->
-						<form onsubmit="return addiFrameURL(event)">
-							<label for="portalId">Insert Portal URL:</label>
-							<input
-								type="text"
-								name="portalURL"
-								id="portalURL"
-								placeholder="Insert Portal URL"
-							/>
-							<input
-								class="btn btn-success btn-sm px-4"
-								type="submit"
-								value="Add URL"
 							/>
 						</form>
 					</div>
