@@ -13,8 +13,6 @@ h2 {
 	padding-left: 0.5rem;
 	display: flex;
 	justify-content: space-between;
-	/* margin-left: 2%;
-	margin-right: 2%; */
 	margin: 1% 2%;
 }
 
@@ -29,7 +27,8 @@ form {
 .flex-parent {
 	display: flex;
 	justify-content: space-between;
-	margin-left: 10%;
+	margin: 0 auto;
+	width: 80%;
 }
 
 fieldset {

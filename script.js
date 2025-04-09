@@ -40,14 +40,22 @@ function createiFrame(URL, id = "", environment = "") {
 	iframe.width = "100%";
 	iframe.height = "1399px";
 
+	const params = new URLSearchParams(URL);
+	if (params.has("amp;id")) {
+		id = params.get("amp;id");
+	}
+	if (params.has("id")) {
+		id = params.get("id");
+	}
+
 	var container = document.createElement("div");
 	container.classList.add("test-iframe");
 	var heading = document.createElement("h2");
 
-	if (id == "") {
-		heading.textContent = "iFrame";
-	} else {
+	if (id != "") {
 		heading.textContent = `${id} (${environment})`;
+	} else {
+		heading.textContent = "iFrame";
 	}
 
 	var button = document.createElement("button");

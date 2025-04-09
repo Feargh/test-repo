@@ -25,7 +25,7 @@
 					<svg class="bi me-2" width="40" height="32">
 						<use xlink:href="#bootstrap"></use>
 					</svg>
-					<span class="fs-4">Simple header</span>
+					<span class="fs-4">Portal test site</span>
 				</a>
 
 				<ul class="nav nav-pills">
@@ -49,63 +49,90 @@
 
 		<!-- Hero -->
 		<div class="px-4 py-5 my-5 text-center hero" id="hero">
-			<div class="flex-parent">
-				<div>
-					<img
-						class="d-block mx-auto mb-4"
-						src="https://career.qatestlab.eu/wp-content/uploads/2021/06/2021-06-08_11-57-37.jpg"
-						alt=""
-						width="291"
-						height="300"
-					/>
-					<h1 class="display-5 fw-bold text-body-emphasis">
-						BC iframe Test Website
-					</h1>
-				</div>
-				<div class="col-lg-6 mx-auto">
-					<p class="lead mb-4">
-						Testing of BC iframe website. Please use butttons to display
-						required iFrames.
-					</p>
+			<div>
+				<img
+					class="d-block mx-auto mb-4"
+					src="https://career.qatestlab.eu/wp-content/uploads/2021/06/2021-06-08_11-57-37.jpg"
+					alt=""
+					width="91"
+					height="100"
+				/>
+			</div>
+			<h1 class="display-5 fw-bold text-body-emphasis">
+				BC iframe Test Website
+			</h1>
+			<p class="lead mb-4">
+				Testing of BC iframe website. Please use butttons to display required
+				iFrames.
+			</p>
+			<div class="">
+				<div class="">
 					<div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-						<div>
-							<!-- Turn2us Portal -->
-							<button
-								type="button"
-								class="btn btn-primary btn-lg px-4 gap-3"
-								onClick="hideShow('t2u-iframe')"
-							>
-								Toggle Turn2us Branded Portal
-							</button>
+						<!-- Turn2us Portal -->
+						<button
+							type="button"
+							class="btn btn-primary btn-lg px-4 gap-3 h-8"
+							onClick="hideShow('t2u-iframe')"
+						>
+							Toggle Turn2us Branded Portal
+						</button>
+						<button
+							type="button"
+							class="btn btn-primary btn-lg px-4 gap-3 h-8"
+							onClick="hideShow('addFromURL')"
+						>
+							Add from URL
+						</button>
+						<button
+							type="button"
+							class="btn btn-primary btn-lg px-4 gap-3 h-8"
+							onClick="hideShow('createPortal')"
+						>
+							Create new portal
+						</button>
+					</div>
 
-							<!-- Submit portal URL -->
-							<form class="m-2" onsubmit="return addiFrameURL(event)">
-								<h2>Create portal from existing URL:</h2>
-								<fieldset>
-									<label
-										class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-										for="portalURL"
-										>Insert Portal URL:</label
-									>
-									<input
-										type="text"
-										name="portalURL"
-										id="portalURL"
-										placeholder="Insert Portal URL"
-									/>
-								</fieldset>
+					<div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+						<!-- Submit portal URL -->
+
+						<form
+							id="addFromURL"
+							class="border border-black rounded-lg p-2 pb-4 text-xl m-2"
+							onsubmit="return addiFrameURL(event)"
+							style="display: none"
+						>
+							<h2>Create portal from existing URL:</h2>
+							<fieldset class="border border-black rounded-lg p-2 mb-4">
+								<label
+									class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+									for="portalURL"
+									>Insert Portal URL:</label
+								>
 								<input
-									class="btn btn-success btn-sm px-4"
-									type="submit"
-									value="Add URL"
+									class=""
+									type="text"
+									name="portalURL"
+									id="portalURL"
+									placeholder="Insert Portal URL"
 								/>
-							</form>
-						</div>
+							</fieldset>
+							<input
+								class="btn btn-success btn-sm px-4"
+								type="submit"
+								value="Add URL"
+							/>
+						</form>
 
 						<!-- Form to pick your own portal -->
-						<form class="m-2" onsubmit="return addiFrame(event)">
+
+						<form
+							id="createPortal"
+							class="border border-black rounded-lg p-2 pb-4 text-xl m-2"
+							onsubmit="return addiFrame(event)"
+							style="display: none"
+						>
 							<h2>Create a new portal:</h2>
-							<fieldset>
+							<fieldset class="border border-black rounded-lg p-2 mb-4">
 								<label
 									class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
 									for="portalId"
@@ -119,7 +146,7 @@
 									placeholder="Enter portal ID"
 								/>
 							</fieldset>
-							<fieldset>
+							<fieldset class="border border-black rounded-lg p-2 mb-4">
 								<h3>Environment:</h3>
 								<input
 									type="radio"
@@ -128,6 +155,9 @@
 									value="production"
 								/>
 								<label for="production">Production (Live)</label><br />
+
+								<input type="radio" id="uat" name="environment" value="uat" />
+								<label for="uat">UAT</label><br />
 
 								<input
 									type="radio"
@@ -143,13 +173,10 @@
 									name="environment"
 									value="local"
 								/>
-								<label for="local">Local</label><br />
-
-								<input type="radio" id="uat" name="environment" value="uat" />
-								<label for="uat">UAT</label><br />
+								<label for="local">Local (developer only)</label><br />
 							</fieldset>
-							<fieldset>
-								<h3>Testing:</h3>
+							<fieldset class="border border-black rounded-lg p-2 mb-4">
+								<h3>Testing Mode:</h3>
 								<input
 									type="radio"
 									id="testing-true"
@@ -163,6 +190,7 @@
 									id="testing-false"
 									name="testing"
 									value="false"
+									checked
 								/>
 								<label for="testing-false">False</label><br />
 							</fieldset>
@@ -180,7 +208,7 @@
 		<!-- iframes -->
 		<div class="iframe-container" id="iframe-container">
 			<div id="t2u-iframe" class="test-iframe">
-				<h2>
+				<h2 class="pl-2 flex justify-between mx-[2%] my-[1%]">
 					Turn2us (Production)
 					<button
 						class="btn btn-danger btn-sm"
