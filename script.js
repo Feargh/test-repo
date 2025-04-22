@@ -1,14 +1,3 @@
-function hideShow() {
-	console.log("toggle hideShow funciton clicked");
-
-	var hero = document.getElementById("hero");
-	if (hero.style.display === "none") {
-		hero.style.display = "block";
-	} else {
-		hero.style.display = "none";
-	}
-}
-
 function hideShow(elementId) {
 	console.log("toggle hideShow function called. ElementId: " + elementId);
 
@@ -20,23 +9,10 @@ function hideShow(elementId) {
 	}
 }
 
-// document
-// 	.getElementById("myCheckbox")
-// 	.addEventListener("click", function (event) {
-// 		event.preventDefault();
-// 	});
-
 function createiFrame(URL, id = "", environment = "") {
-	// if (URL.contains("?_ga=")) {
-	// 	URL = URL.split("?_ga=")[0];
-	// }
-
-	// if (!URL.contains("?portal=true")) {
-	// 	URL = URL + "?portal=true";
-	// }
-
 	var iframe = document.createElement("iframe");
 	iframe.src = URL;
+	iframe.id = new Date().getTime();
 	iframe.width = "100%";
 	iframe.height = "1399px";
 
@@ -55,20 +31,46 @@ function createiFrame(URL, id = "", environment = "") {
 	if (id != "") {
 		heading.textContent = `${id} (${environment})`;
 	} else {
-		heading.textContent = "iFrame";
+		heading.textContent = `Turn2us (${environment})`;
 	}
 
-	var button = document.createElement("button");
-	button.textContent = "Remove iFrame";
-	button.onclick = function () {
+	var removeButton = document.createElement("button");
+	removeButton.textContent = "Remove iFrame";
+	removeButton.onclick = function () {
 		container.remove();
 	};
-	button.classList.add("btn");
-	button.classList.add("btn-danger");
-	button.classList.add("btn-sm");
+	removeButton.classList.add("btn");
+	removeButton.classList.add("btn-danger");
+	removeButton.classList.add("btn-sm");
+
+	heading.appendChild(removeButton);
+
+	// copy URL button
+	// var copyButton = document.createElement("button");
+	// copyButton.textContent = "Copy URL";
+	// copyButton.onclick = function () {
+	// 	navigator.clipboard
+	// 		.writeText(
+	// 			document.getElementById(iframe.id).contentWindow.document.referrer
+	// 		)
+	// 		.then(
+	// 			function () {
+	// 				console.log("URL copied to clipboard");
+	// 				console.log(
+	// 					document.getElementById(iframe.id).contentWindow.document.referrer
+	// 				);
+	// 			},
+	// 			function (err) {
+	// 				console.error("Could not copy text: ", err);
+	// 			}
+	// 		);
+	// };
+	// copyButton.classList.add("btn");
+	// copyButton.classList.add("btn-primary");
+	// copyButton.classList.add("btn-sm");
+	// heading.appendChild(copyButton);
 
 	container.appendChild(heading);
-	heading.appendChild(button);
 	container.appendChild(iframe);
 
 	var iframeContainer = document.getElementById("iframe-container");
@@ -114,3 +116,22 @@ function addiFrameURL(event) {
 
 	createiFrame(url);
 }
+
+// function addiFrameRemoveButton() {
+// 	var button = document.createElement("button");
+// 	button.textContent = "Remove iFrame";
+// 	button.onclick = function () {
+// 		container.remove();
+// 	};
+// 	button.classList.add("btn");
+// 	button.classList.add("btn-danger");
+// 	button.classList.add("btn-sm");
+
+// 	heading.appendChild(button);
+
+// 	// container.appendChild(heading);
+// 	// container.appendChild(iframe);
+
+// 	// var iframeContainer = document.getElementById("iframe-container");
+// 	// iframeContainer.appendChild(container);
+// }
