@@ -236,7 +236,6 @@ function resizeIframe(iframe) {
 		iframe.style.height = newHeight + 'px';
 	} catch (e) {
 		//-- For cross-origin, we rely on postMessage
-		iframe.style.height = '2000px'; //-- Set a large default height
 	}
 }
 
