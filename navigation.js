@@ -36,10 +36,20 @@ function createNavigation(currentPage) {
 						<span class="page-indicator"></span>
 						<span>PIP Helper</span>
 					</a>
-					<a href="bc.html" class="nav-link page-nav-link ${currentPage === 'bc' ? 'active' : ''}">
+					<a href="bc-testing.html" class="nav-link page-nav-link ${currentPage === 'bc' || currentPage === 'bc-testing' ? 'active' : ''}">
 						<span class="page-indicator"></span>
 						<span>Benefits Calculator</span>
 					</a>
+					<div class="nav-subsection ${currentPage === 'bc' || currentPage === 'bc-testing' || currentPage === 'bc-logic-checker' ? 'visible' : 'hidden'}">
+						<a href="bc-testing.html" class="nav-link nav-sublink ${currentPage === 'bc-testing' ? 'active' : ''}">
+							<span class="page-indicator"></span>
+							<span>Testing Page</span>
+						</a>
+						<a href="bc-logic-checker.html" class="nav-link nav-sublink ${currentPage === 'bc-logic-checker' ? 'active' : ''}">
+							<span class="page-indicator"></span>
+							<span>Show/Hide Logic Checker</span>
+						</a>
+					</div>
 					<a href="custom-testing.html" class="nav-link page-nav-link ${currentPage === 'custom-testing' ? 'active' : ''}">
 						<span class="page-indicator"></span>
 						<span>Custom Testing</span>
@@ -95,7 +105,7 @@ function getPageSpecificSections(currentPage) {
 				</div>
 			</div>
 		`;
-	} else if (currentPage === 'bc') {
+	} else if (currentPage === 'bc-testing') {
 		return `
 			<div class="nav-section">
 				<h6 class="nav-section-title">Environment</h6>

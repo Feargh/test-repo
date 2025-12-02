@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Show/Hide Logic Checker - Benefits Calculator</title>
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+			integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+			crossorigin="anonymous"
+		/>
+		<link rel="stylesheet" href="Stylesheet.css" />
+	</head>
+	<body>
+		<div class="dashboard-container">
+			<!-- Navigation will be inserted here by JavaScript -->
+
+			<!-- Main Content -->
+			<main class="main-content">
+				<section class="iframe-section">
+					<div class="iframe-header glass">
+						<div class="iframe-header-content">
+							<h2 class="iframe-title">C# Logic Expression Validator</h2>
+							<p style="color: var(--color-gray-600); margin: 0;">Paste your logic expressions to validate syntax, brackets, and operators</p>
+						</div>
+					</div>
+
+					<div class="glass" style="padding: var(--spacing-xl);">
+						<div class="logic-content">
+							<div class="logic-panel">
+								<h3>Expression Input</h3>
+								<div class="editor-wrapper">
+									<div class="line-numbers" id="lineNumbers">1</div>
+									<textarea id="editor" spellcheck="false" placeholder="Paste your C# logic expression here..."></textarea>
+								</div>
+								<div class="button-group">
+									<button class="logic-btn primary" onclick="validateExpression()">Validate</button>
+									<button class="logic-btn" onclick="clearEditor()">Clear</button>
+									<button class="logic-btn" onclick="loadExample()">Load Example</button>
+									<button class="logic-btn success" onclick="openSaveVersionModal()">Save Version</button>
+									<button class="logic-btn warning" onclick="checkDuplicates()">Check Duplicates</button>
+								</div>
+
+								<!-- Versions Panel -->
+								<div class="versions-panel">
+									<div class="versions-header">
+										<span class="versions-title">📚 Saved Versions</span>
+										<span id="versionCount" style="color: var(--color-gray-600); font-size: var(--font-size-sm);">0 saved</span>
+									</div>
+									<div id="versionsList">
+										<div class="no-versions">No versions saved yet. Click "Save Version" to save the current expression.</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="logic-panel">
+								<h3>Validation Results</h3>
+								<div class="errors-panel" id="errorsPanel">
+									<div class="no-errors">
+										<span>ℹ️</span>
+										<span>Enter code to validate...</span>
+									</div>
+								</div>
+
+								<!-- Duplicate Results -->
+								<div class="duplicate-results" id="duplicateResults"></div>
+							</div>
+						</div>
+
+						<!-- Comparison View -->
+						<div class="comparison-view" id="comparisonView">
+							<div class="comparison-header">
+								<span class="comparison-title">🔍 Version Comparison</span>
+								<button class="close-comparison" onclick="closeComparison()">Close</button>
+							</div>
+							<div class="comparison-container">
+								<div class="comparison-side">
+									<div class="comparison-side-title" id="comparisonLeftTitle">Version A</div>
+									<div class="comparison-code" id="comparisonLeft"></div>
+								</div>
+								<div class="comparison-side">
+									<div class="comparison-side-title" id="comparisonRightTitle">Version B</div>
+									<div class="comparison-code" id="comparisonRight"></div>
+								</div>
+							</div>
+						</div>
+
+						<div class="pathway-panel-container" id="pathwayPanel">
+							<div class="logic-panel">
+								<div class="pathway-header">
+									<h3 class="pathway-title">🌳 Logic Pathway Analysis</h3>
+									<span class="pathway-count" id="pathwayCount">0 pathways</span>
+								</div>
+								<div class="pathway-summary">
+									<div class="pathway-summary-title">What is this?</div>
+									<div class="pathway-summary-content">
+										This breaks down your complex logic into easy-to-understand paths. Each pathway shows one possible route through your conditions. Preconditions must be true for all paths, then one of the main pathways must be satisfied.
+									</div>
+								</div>
+								<div class="pathway-tree" id="pathwayTree"></div>
+							</div>
+						</div>
+
+						<div class="stats-container">
+							<div class="stat-item">
+								<span class="stat-label">Lines:</span>
+								<span class="stat-value" id="lineCount">0</span>
+							</div>
+							<div class="stat-item">
+								<span class="stat-label">Errors:</span>
+								<span class="stat-value error" id="errorCount">0</span>
+							</div>
+							<div class="stat-item">
+								<span class="stat-label">Warnings:</span>
+								<span class="stat-value warning" id="warningCount">0</span>
+							</div>
+							<div class="stat-item">
+								<span class="stat-label">Status:</span>
+								<span class="stat-value" id="status">Ready</span>
+							</div>
+						</div>
+					</div>
+				</section>
+			</main>
+		</div>
+
+		<!-- Save Version Modal -->
+		<div class="modal" id="saveVersionModal">
+			<div class="modal-content">
+				<div class="modal-title">Save Version</div>
+				<input type="text" class="modal-input" id="versionName" placeholder="Version name (e.g., 'JSA Calculation v2.1')">
+				<textarea class="modal-textarea" id="versionDescription" placeholder="Optional description..."></textarea>
+				<div class="modal-actions">
+					<button class="modal-btn secondary" onclick="closeSaveVersionModal()">Cancel</button>
+					<button class="modal-btn primary" onclick="saveVersion()">Save</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Scripts -->
+		<script src="navigation.js"></script>
+		<script>
+			//-- Initialize navigation for BC Logic Checker page
+			document.addEventListener("DOMContentLoaded", function() {
+				initializeNavigation('bc-logic-checker');
+			});
+		</script>
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+			crossorigin="anonymous"
+		></script>
+		<script src="script.js"></script>
+	</body>
+</html>

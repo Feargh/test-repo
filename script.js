@@ -450,22 +450,22 @@ function updateBCUrlPreview(url) {
 function copyToClipboard(inputId) {
 	const input = document.getElementById(inputId);
 	if (!input) return;
-	
+
 	//-- Select the text
 	input.select();
 	input.setSelectionRange(0, 99999); //-- For mobile devices
-	
+
 	//-- Copy the text
 	navigator.clipboard.writeText(input.value).then(function() {
 		console.log("URL copied to clipboard:", input.value);
-		
+
 		//-- Show feedback
 		const copyButton = input.nextElementSibling;
 		if (copyButton && copyButton.classList.contains('btn-copy')) {
 			const originalHTML = copyButton.innerHTML;
 			copyButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l3 3L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Copied!</span>';
 			copyButton.classList.add('copied');
-			
+
 			//-- Reset after 2 seconds
 			setTimeout(function() {
 				copyButton.innerHTML = originalHTML;
@@ -474,7 +474,7 @@ function copyToClipboard(inputId) {
 		}
 	}, function(err) {
 		console.error("Could not copy text:", err);
-		
+
 		//-- Fallback for older browsers
 		try {
 			document.execCommand('copy');
@@ -483,4 +483,969 @@ function copyToClipboard(inputId) {
 			console.error("Fallback copy method also failed:", e);
 		}
 	});
+}
+
+//-- ===========================
+//-- LOGIC VALIDATOR FUNCTIONS
+//-- ===========================
+
+//-- Initialize logic validator if on the logic checker page
+document.addEventListener("DOMContentLoaded", function() {
+	const editor = document.getElementById("editor");
+	const lineNumbers = document.getElementById("lineNumbers");
+	const errorsPanel = document.getElementById("errorsPanel");
+
+	if (!editor || !lineNumbers || !errorsPanel) {
+		//-- Not on the logic checker page, exit early
+		return;
+	}
+
+	//-- Initialize version management
+	window.savedVersions = JSON.parse(localStorage.getItem('logicValidatorVersions') || '[]');
+
+	//-- Setup event listeners
+	editor.addEventListener('input', function() {
+		updateLineNumbers();
+		validateExpression();
+	});
+
+	editor.addEventListener('scroll', function() {
+		lineNumbers.scrollTop = editor.scrollTop;
+	});
+
+	//-- Initialize line numbers
+	updateLineNumbers();
+	renderVersionsList();
+});
+
+function updateLineNumbers() {
+	const editor = document.getElementById("editor");
+	const lineNumbers = document.getElementById("lineNumbers");
+	const lines = editor.value.split('\n').length;
+	lineNumbers.innerHTML = Array.from({length: lines}, (_, i) => i + 1).join('\n');
+	document.getElementById('lineCount').textContent = lines;
+}
+
+function validateExpression() {
+	const editor = document.getElementById("editor");
+	const errorsPanel = document.getElementById("errorsPanel");
+	const code = editor.value;
+
+	if (!code.trim()) {
+		errorsPanel.innerHTML = `
+			<div class="no-errors">
+				<span>ℹ️</span>
+				<span>Enter code to validate...</span>
+			</div>
+		`;
+		updateStats(0, 0, 'Ready');
+		hidePathwayPanel();
+		return;
+	}
+
+	const errors = [];
+	const warnings = [];
+
+	//-- Check for bracket matching
+	const bracketErrors = checkBrackets(code);
+	errors.push(...bracketErrors);
+
+	//-- Check for quote matching
+	const quoteResults = checkQuotes(code);
+	errors.push(...quoteResults.errors);
+	warnings.push(...quoteResults.warnings);
+
+	//-- Check for operator issues
+	const operatorErrors = checkOperators(code);
+	errors.push(...operatorErrors);
+
+	//-- Check for expression validity
+	const expressionWarnings = checkExpressions(code);
+	warnings.push(...expressionWarnings);
+
+	//-- Display results
+	displayResults(errors, warnings);
+
+	const status = errors.length > 0 ? 'Invalid' : warnings.length > 0 ? 'Valid (with warnings)' : 'Valid';
+	updateStats(errors.length, warnings.length, status);
+
+	//-- Generate pathway analysis if no critical errors
+	if (errors.length === 0) {
+		analyzePathways(code);
+	} else {
+		hidePathwayPanel();
+	}
+}
+
+function checkBrackets(code) {
+	const errors = [];
+	const stack = [];
+	const lines = code.split('\n');
+
+	let lineNum = 0;
+	let charNum = 0;
+
+	for (let i = 0; i < code.length; i++) {
+		const char = code[i];
+
+		if (char === '\n') {
+			lineNum++;
+			charNum = 0;
+			continue;
+		}
+
+		charNum++;
+
+		if (char === '(') {
+			stack.push({ char: '(', line: lineNum, col: charNum, index: i });
+		} else if (char === ')') {
+			if (stack.length === 0) {
+				errors.push({
+					type: 'Bracket Error',
+					line: lineNum + 1,
+					col: charNum,
+					message: 'Closing bracket ")" has no matching opening bracket',
+					context: getContext(code, i, lines, lineNum),
+					suggestion: 'Add an opening bracket "(" before this closing bracket, or remove this closing bracket'
+				});
+			} else {
+				stack.pop();
+			}
+		}
+	}
+
+	//-- Check for unclosed brackets
+	while (stack.length > 0) {
+		const unclosed = stack.pop();
+		errors.push({
+			type: 'Bracket Error',
+			line: unclosed.line + 1,
+			col: unclosed.col,
+			message: 'Opening bracket "(" has no matching closing bracket',
+			context: getContext(code, unclosed.index, lines, unclosed.line),
+			suggestion: 'Add a closing bracket ")" to match this opening bracket'
+		});
+	}
+
+	return errors;
+}
+
+function checkQuotes(code) {
+	const errors = [];
+	const warnings = [];
+	const lines = code.split('\n');
+
+	for (let lineNum = 0; lineNum < lines.length; lineNum++) {
+		const line = lines[lineNum];
+
+		//-- Count total quotes
+		const quoteCount = (line.match(/'/g) || []).length;
+
+		//-- If odd number of quotes, there might be an issue
+		if (quoteCount % 2 !== 0) {
+			//-- Check if line contains complete quoted strings with apostrophes inside
+			const quotedStringsWithApostrophes = line.match(/'[^']*'[^']*'/g);
+
+			if (quotedStringsWithApostrophes && quotedStringsWithApostrophes.length > 0) {
+				//-- This is a string with an apostrophe inside - just warn
+				warnings.push({
+					type: 'Quote Warning',
+					line: lineNum + 1,
+					col: 1,
+					message: "Line contains apostrophes within strings (e.g., \"Jobseeker's Allowance\") - verify quotes are balanced",
+					context: line,
+					suggestion: "If your parser handles apostrophes within single-quoted strings, this is fine. Otherwise, consider escaping or using double quotes."
+				});
+			} else {
+				//-- Likely a real unclosed string
+				const firstQuote = line.indexOf("'");
+				errors.push({
+					type: 'Quote Error',
+					line: lineNum + 1,
+					col: firstQuote + 1,
+					message: 'Odd number of quotes detected - possible unclosed string',
+					context: line,
+					suggestion: "Add a closing single quote ' to match the opening quote"
+				});
+			}
+		}
+	}
+
+	return { errors, warnings };
+}
+
+function checkOperators(code) {
+	const errors = [];
+	const lines = code.split('\n');
+
+	for (let lineNum = 0; lineNum < lines.length; lineNum++) {
+		const line = lines[lineNum];
+
+		//-- Check for single = instead of ==
+		const singleEquals = /(?<![=!<>])=(?!=)/g;
+		let match;
+		while ((match = singleEquals.exec(line)) !== null) {
+			//-- Skip if it's inside a string
+			if (!isInsideString(line, match.index)) {
+				errors.push({
+					type: 'Operator Error',
+					line: lineNum + 1,
+					col: match.index + 1,
+					message: 'Single "=" found - did you mean "==" for comparison?',
+					context: line,
+					suggestion: 'Use "==" for equality comparison, not "="'
+				});
+			}
+		}
+
+		//-- Check for double && or ||
+		if (/&&\s*&&/.test(line)) {
+			errors.push({
+				type: 'Operator Error',
+				line: lineNum + 1,
+				col: line.indexOf('&&'),
+				message: 'Double AND operator "&&&&" found',
+				context: line,
+				suggestion: 'Remove one of the && operators'
+			});
+		}
+
+		if (/\|\|\s*\|\|/.test(line)) {
+			errors.push({
+				type: 'Operator Error',
+				line: lineNum + 1,
+				col: line.indexOf('||'),
+				message: 'Double OR operator "||||" found',
+				context: line,
+				suggestion: 'Remove one of the || operators'
+			});
+		}
+	}
+
+	return errors;
+}
+
+function checkExpressions(code) {
+	const warnings = [];
+	const lines = code.split('\n');
+
+	for (let lineNum = 0; lineNum < lines.length; lineNum++) {
+		const line = lines[lineNum].trim();
+
+		//-- Check for lines ending with operators
+		if (/(\|\||&&)$/.test(line) && lineNum < lines.length - 1) {
+			const nextLine = lines[lineNum + 1].trim();
+			if (nextLine === '' || nextLine.startsWith(')')) {
+				warnings.push({
+					type: 'Expression Warning',
+					line: lineNum + 1,
+					col: line.length,
+					message: 'Logical operator at end of line with no following expression',
+					context: line,
+					suggestion: 'Ensure there is a valid expression after this operator'
+				});
+			}
+		}
+
+		//-- Check for empty parentheses
+		if (/\(\s*\)/.test(line)) {
+			warnings.push({
+				type: 'Expression Warning',
+				line: lineNum + 1,
+				col: line.indexOf('('),
+				message: 'Empty parentheses found',
+				context: line,
+				suggestion: 'Remove empty parentheses or add an expression inside them'
+			});
+		}
+
+		//-- Check for negation followed by operators
+		if (/!\s*(\|\||&&)/.test(line)) {
+			warnings.push({
+				type: 'Expression Warning',
+				line: lineNum + 1,
+				col: line.indexOf('!'),
+				message: 'Negation operator "!" followed directly by logical operator',
+				context: line,
+				suggestion: 'Add an expression after the ! operator'
+			});
+		}
+	}
+
+	return warnings;
+}
+
+function isInsideString(line, position) {
+	let inString = false;
+	for (let i = 0; i < position; i++) {
+		if (line[i] === "'") {
+			inString = !inString;
+		}
+	}
+	return inString;
+}
+
+function getContext(code, index, lines, lineNum) {
+	const line = lines[lineNum];
+	return line;
+}
+
+function displayResults(errors, warnings) {
+	const errorsPanel = document.getElementById("errorsPanel");
+
+	if (errors.length === 0 && warnings.length === 0) {
+		errorsPanel.innerHTML = `
+			<div class="no-errors">
+				<span>✅</span>
+				<span>No errors or warnings found! Your expression looks valid.</span>
+			</div>
+		`;
+		return;
+	}
+
+	let html = '';
+
+	//-- Display errors first
+	errors.forEach(error => {
+		html += `
+			<div class="error-item">
+				<div class="error-header">
+					<span class="error-type">❌ ${error.type}</span>
+					<span class="error-location">Line ${error.line}, Col ${error.col}</span>
+				</div>
+				<div class="error-message">${error.message}</div>
+				<div class="error-context">${escapeHtml(error.context)}</div>
+				<div class="error-suggestion">💡 ${error.suggestion}</div>
+			</div>
+		`;
+	});
+
+	//-- Then display warnings
+	warnings.forEach(warning => {
+		html += `
+			<div class="error-item warning">
+				<div class="error-header">
+					<span class="error-type">⚠️ ${warning.type}</span>
+					<span class="error-location">Line ${warning.line}, Col ${warning.col}</span>
+				</div>
+				<div class="error-message">${warning.message}</div>
+				<div class="error-context">${escapeHtml(warning.context)}</div>
+				<div class="error-suggestion">💡 ${warning.suggestion}</div>
+			</div>
+		`;
+	});
+
+	errorsPanel.innerHTML = html;
+}
+
+function updateStats(errorCount, warningCount, status) {
+	document.getElementById('errorCount').textContent = errorCount;
+	document.getElementById('warningCount').textContent = warningCount;
+
+	const statusElement = document.getElementById('status');
+	statusElement.textContent = status;
+	statusElement.className = 'stat-value';
+
+	if (status === 'Invalid') {
+		statusElement.classList.add('error');
+	} else if (status === 'Valid (with warnings)') {
+		statusElement.classList.add('warning');
+	} else {
+		statusElement.classList.add('success');
+	}
+}
+
+function escapeHtml(text) {
+	return text.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#039;');
+}
+
+function clearEditor() {
+	const editor = document.getElementById("editor");
+	editor.value = '';
+	updateLineNumbers();
+	validateExpression();
+	hidePathwayPanel();
+}
+
+function loadExample() {
+	const editor = document.getElementById("editor");
+	editor.value = `ClientLiveWithPartner == 'Yes'
+&& !funcPartnerIsPensionCreditAge
+&& !(funcClientCountry == Scotland && funcIsChildUnder6)
+&& (
+PartnerWorking == 'Unemployed and looking for work'
+|| (
+ClientPartnerReceivingBens == 'No'
+&& (
+(funcPartnerAge < 25 && (funcPartnerJsaWorking < {EsaYoungVariable}))
+|| (funcPartnerAge >= 25 && (funcPartnerJsaWorking < {EsaBasicVariable}))
+)
+&& (
+PartnerWorkStatus == 'Employed'
+|| PartnerWorkStatus == 'In the reserve forces'
+|| PartnerNonWorkStatus == 'In the reserve forces'
+|| PartnerWorkStatus == 'On call firefighter'
+)
+)
+|| (PartnerDisability == 'Yes'
+&& (PartnerNonWorkStatus == 'Unable to work due to illness or disability' || PartnerNonWorkStatus == 'Employed - on long term sick' || PartnerNonWorkStatus == 'Self employed - on long term sick' || PartnerWorkStatus ==  'Employed - on long term sick' || PartnerWorkStatus == 'Self employed - on long term sick')
+&& PartnerIncomeSickPay != 'Yes'))
+&& !(PartnerIncomeMaternityPay > 0)
+&& !(PartnerIncomeContractualMaternityPay > 0)
+&& !(PartnerIncomeMaternityAllowance > 0)
+&& ClientPartnerIrEsa != 'Yes'
+&& ClientPartnerIbJsa != 'Yes'
+&& ClientPartnerIncomeSupport != 'Yes'
+&& ClientPartnerPensionCredit != 'Yes'
+&& PartnerIncomeFromBenefits != 'New Style Jobseeker's Allowance' && PartnerIncomeFromBenefits != 'New Style Employment and Support Allowance' && PartnerIncomeFromBenefits != 'Contributory Employment and Support Allowance'
+&& PartnerIncomeFromBenefits != 'Widowed Mother's Allowance or Widowed Parent's Allowance' && PartnerIncomeFromBenefits != 'War widows / Widower's pension or War Disablement pension or Guaranteed Income Payment' && PartnerIncomeFromBenefits != 'Industrial Injuries Disablement Benefit or Reduced Earnings Allowance' && PartnerIncomeFromBenefits != 'Severe Disablement Allowance'
+&& PartnerCarerAllow != 'Yes' && PartnerRequestCA != 'Yes' && PartnerCarerSupport != 'Yes' && PartnerRequestCSP != 'Yes'`;
+
+	updateLineNumbers();
+	validateExpression();
+}
+
+//-- === PATHWAY ANALYSIS FUNCTIONS ===
+
+function analyzePathways(code) {
+	//-- Remove newlines and extra spaces for easier parsing
+	const cleanCode = code.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+
+	try {
+		const tree = parseExpression(cleanCode);
+		displayPathwayTree(tree);
+		showPathwayPanel();
+	} catch (e) {
+		console.error('Error parsing pathways:', e);
+		hidePathwayPanel();
+	}
+}
+
+function parseExpression(expr) {
+	expr = expr.trim();
+
+	//-- Split by top-level && operators
+	const andParts = splitByTopLevel(expr, '&&');
+
+	if (andParts.length > 1) {
+		//-- Multiple AND conditions
+		const children = andParts.map(part => parseExpression(part));
+
+		//-- Separate preconditions from main pathways
+		const preconditions = [];
+		const mainLogic = [];
+
+		children.forEach(child => {
+			if (child.type === 'or' || (child.type === 'group' && hasOrOperator(child.expression))) {
+				mainLogic.push(child);
+			} else {
+				preconditions.push(child);
+			}
+		});
+
+		return {
+			type: 'and',
+			children: children,
+			preconditions: preconditions,
+			mainLogic: mainLogic,
+			expression: expr
+		};
+	}
+
+	//-- Split by top-level || operators
+	const orParts = splitByTopLevel(expr, '||');
+
+	if (orParts.length > 1) {
+		return {
+			type: 'or',
+			children: orParts.map(part => parseExpression(part)),
+			expression: expr
+		};
+	}
+
+	//-- Handle grouped expressions
+	if (expr.startsWith('(') && expr.endsWith(')')) {
+		const inner = expr.slice(1, -1);
+		return {
+			type: 'group',
+			child: parseExpression(inner),
+			expression: inner
+		};
+	}
+
+	//-- Leaf node (simple condition)
+	return {
+		type: 'condition',
+		expression: expr
+	};
+}
+
+function splitByTopLevel(expr, operator) {
+	const parts = [];
+	let current = '';
+	let depth = 0;
+	let i = 0;
+
+	while (i < expr.length) {
+		const char = expr[i];
+
+		if (char === '(') {
+			depth++;
+			current += char;
+		} else if (char === ')') {
+			depth--;
+			current += char;
+		} else if (depth === 0 && expr.slice(i, i + operator.length) === operator) {
+			if (current.trim()) {
+				parts.push(current.trim());
+			}
+			current = '';
+			i += operator.length - 1;
+		} else {
+			current += char;
+		}
+
+		i++;
+	}
+
+	if (current.trim()) {
+		parts.push(current.trim());
+	}
+
+	return parts.length > 1 ? parts : [expr];
+}
+
+function hasOrOperator(expr) {
+	let depth = 0;
+	for (let i = 0; i < expr.length - 1; i++) {
+		if (expr[i] === '(') depth++;
+		else if (expr[i] === ')') depth--;
+		else if (depth === 0 && expr[i] === '|' && expr[i + 1] === '|') {
+			return true;
+		}
+	}
+	return false;
+}
+
+function displayPathwayTree(tree) {
+	const pathwayTree = document.getElementById('pathwayTree');
+	let html = '';
+
+	if (tree.type === 'and' && tree.preconditions.length > 0) {
+		//-- Display preconditions first
+		html += '<div class="tree-node">';
+		html += '<div class="node-content">';
+		html += '<span class="node-icon">📋</span>';
+		html += '<span class="node-label precondition">PRECONDITIONS</span>';
+		html += '<div class="node-expression">These conditions must ALL be true:</div>';
+		html += '</div>';
+		html += '<div class="node-children">';
+		tree.preconditions.forEach(precond => {
+			html += renderNode(precond, 'precondition');
+		});
+		html += '</div>';
+		html += '</div>';
+
+		//-- Display main pathways
+		if (tree.mainLogic.length > 0) {
+			const pathwayCount = countPathways(tree.mainLogic);
+			document.getElementById('pathwayCount').textContent = `${pathwayCount} pathway${pathwayCount !== 1 ? 's' : ''}`;
+
+			html += '<div class="tree-node" style="margin-top: var(--spacing-lg);">';
+			html += '<div class="node-content">';
+			html += '<span class="node-icon">🔀</span>';
+			html += '<span class="node-label or">THEN ONE OF</span>';
+			html += '<div class="node-expression">At least ONE of these pathways must be satisfied:</div>';
+			html += '</div>';
+			html += '<div class="node-children">';
+			tree.mainLogic.forEach((pathway, index) => {
+				html += renderNode(pathway, 'pathway', index + 1);
+			});
+			html += '</div>';
+			html += '</div>';
+		}
+	} else {
+		html += renderNode(tree);
+	}
+
+	pathwayTree.innerHTML = html;
+}
+
+function renderNode(node, context = '', pathwayNum = null) {
+	let html = '<div class="tree-node">';
+
+	if (node.type === 'and') {
+		html += '<div class="node-content">';
+		html += '<span class="node-icon">➕</span>';
+		html += '<span class="node-label and">AND</span>';
+		html += '<div class="node-expression">All of these must be true:</div>';
+		html += '</div>';
+		html += '<div class="node-children">';
+		node.children.forEach(child => {
+			html += renderNode(child, context);
+		});
+		html += '</div>';
+	} else if (node.type === 'or') {
+		html += '<div class="node-content">';
+		html += '<span class="node-icon">🔀</span>';
+		html += '<span class="node-label or">OR</span>';
+		html += '<div class="node-expression">At least one of these must be true:</div>';
+		html += '</div>';
+		html += '<div class="node-children">';
+		node.children.forEach(child => {
+			html += renderNode(child, context);
+		});
+		html += '</div>';
+	} else if (node.type === 'group') {
+		return renderNode(node.child, context, pathwayNum);
+	} else {
+		//-- Leaf condition
+		const expr = node.expression;
+		const displayExpr = formatExpression(expr);
+
+		html += '<div class="node-content">';
+		if (context === 'pathway' && pathwayNum) {
+			html += `<span class="node-icon">🎯</span>`;
+			html += `<span class="node-label pathway">PATH ${pathwayNum}</span>`;
+		} else {
+			html += '<span class="node-icon">✓</span>';
+		}
+		html += `<div class="node-expression">`;
+		html += displayExpr;
+		html += '</div>';
+		html += '</div>';
+	}
+
+	html += '</div>';
+	return html;
+}
+
+function formatExpression(expr) {
+	//-- Escape HTML entities first to prevent XSS
+	expr = expr.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;');
+
+	//-- Add syntax highlighting to expressions
+	let formatted = expr;
+
+	//-- Highlight operators with better spacing and line breaks for long expressions
+	formatted = formatted.replace(/&amp;&amp;/g, '\n<span style="color: var(--color-warning); font-weight: bold;">AND</span> ');
+	formatted = formatted.replace(/\|\|/g, '\n<span style="color: #9b59b6; font-weight: bold;">OR</span> ');
+	formatted = formatted.replace(/!=/g, ' <span style="color: var(--color-danger);">≠</span> ');
+	formatted = formatted.replace(/==/g, ' <span style="color: var(--color-success);">=</span> ');
+	formatted = formatted.replace(/(&lt;=|&gt;=|&lt;|&gt;)/g, ' <span style="color: var(--color-primary);">$1</span> ');
+
+	//-- Highlight negation
+	formatted = formatted.replace(/^!([a-zA-Z])/g, '<span style="color: var(--color-danger); font-weight: bold;">NOT</span> $1');
+	formatted = formatted.replace(/\s!([a-zA-Z])/g, ' <span style="color: var(--color-danger); font-weight: bold;">NOT</span> $1');
+
+	//-- Trim extra whitespace but preserve line breaks
+	formatted = formatted.trim();
+
+	return formatted;
+}
+
+function countPathways(nodes) {
+	let count = 0;
+	nodes.forEach(node => {
+		if (node.type === 'or') {
+			count += node.children.length;
+		} else {
+			count += 1;
+		}
+	});
+	return count;
+}
+
+function showPathwayPanel() {
+	const panel = document.getElementById('pathwayPanel');
+	if (panel) {
+		panel.classList.add('visible');
+	}
+}
+
+function hidePathwayPanel() {
+	const panel = document.getElementById('pathwayPanel');
+	if (panel) {
+		panel.classList.remove('visible');
+	}
+}
+
+//-- === VERSION MANAGEMENT ===
+
+function openSaveVersionModal() {
+	const editor = document.getElementById("editor");
+	if (!editor.value.trim()) {
+		alert('Please enter some code before saving a version.');
+		return;
+	}
+	document.getElementById('saveVersionModal').classList.add('active');
+	document.getElementById('versionName').value = '';
+	document.getElementById('versionDescription').value = '';
+	document.getElementById('versionName').focus();
+}
+
+function closeSaveVersionModal() {
+	document.getElementById('saveVersionModal').classList.remove('active');
+}
+
+function saveVersion() {
+	const editor = document.getElementById("editor");
+	const name = document.getElementById('versionName').value.trim();
+	const description = document.getElementById('versionDescription').value.trim();
+	const code = editor.value;
+
+	if (!name) {
+		alert('Please enter a version name.');
+		return;
+	}
+
+	const version = {
+		id: Date.now(),
+		name: name,
+		description: description,
+		code: code,
+		timestamp: new Date().toISOString(),
+		dateFormatted: new Date().toLocaleString()
+	};
+
+	window.savedVersions.unshift(version);
+	localStorage.setItem('logicValidatorVersions', JSON.stringify(window.savedVersions));
+
+	closeSaveVersionModal();
+	renderVersionsList();
+}
+
+function loadVersion(id) {
+	const editor = document.getElementById("editor");
+	const version = window.savedVersions.find(v => v.id === id);
+	if (version) {
+		editor.value = version.code;
+		updateLineNumbers();
+		validateExpression();
+	}
+}
+
+function deleteVersion(id) {
+	if (confirm('Are you sure you want to delete this version?')) {
+		window.savedVersions = window.savedVersions.filter(v => v.id !== id);
+		localStorage.setItem('logicValidatorVersions', JSON.stringify(window.savedVersions));
+		renderVersionsList();
+	}
+}
+
+function compareVersions(id) {
+	const editor = document.getElementById("editor");
+	const version = window.savedVersions.find(v => v.id === id);
+	if (!version) return;
+
+	const currentCode = editor.value;
+	const versionCode = version.code;
+
+	showComparison(currentCode, versionCode, 'Current Code', version.name);
+}
+
+function renderVersionsList() {
+	const versionsList = document.getElementById('versionsList');
+	const versionCount = document.getElementById('versionCount');
+
+	if (!versionsList || !versionCount) return;
+
+	versionCount.textContent = `${window.savedVersions.length} saved`;
+
+	if (window.savedVersions.length === 0) {
+		versionsList.innerHTML = '<div class="no-versions">No versions saved yet. Click "Save Version" to save the current expression.</div>';
+		return;
+	}
+
+	let html = '';
+	window.savedVersions.forEach(version => {
+		html += `
+			<div class="version-item">
+				<div class="version-info">
+					<div class="version-name">${escapeHtml(version.name)}</div>
+					<div class="version-meta">
+						${version.dateFormatted}
+						${version.description ? ' • ' + escapeHtml(version.description) : ''}
+					</div>
+				</div>
+				<div class="version-actions">
+					<button class="version-btn load" onclick="loadVersion(${version.id})">Load</button>
+					<button class="version-btn compare" onclick="compareVersions(${version.id})">Compare</button>
+					<button class="version-btn delete" onclick="deleteVersion(${version.id})">Delete</button>
+				</div>
+			</div>
+		`;
+	});
+
+	versionsList.innerHTML = html;
+}
+
+//-- === COMPARISON FUNCTIONS ===
+
+function showComparison(codeA, codeB, titleA = 'Version A', titleB = 'Version B') {
+	document.getElementById('comparisonLeftTitle').textContent = titleA;
+	document.getElementById('comparisonRightTitle').textContent = titleB;
+
+	const diff = computeDiff(codeA, codeB);
+	document.getElementById('comparisonLeft').innerHTML = diff.left;
+	document.getElementById('comparisonRight').innerHTML = diff.right;
+
+	document.getElementById('comparisonView').classList.add('active');
+}
+
+function closeComparison() {
+	document.getElementById('comparisonView').classList.remove('active');
+}
+
+function computeDiff(codeA, codeB) {
+	const linesA = codeA.split('\n');
+	const linesB = codeB.split('\n');
+
+	let leftHtml = '';
+	let rightHtml = '';
+
+	const maxLines = Math.max(linesA.length, linesB.length);
+
+	for (let i = 0; i < maxLines; i++) {
+		const lineA = linesA[i] !== undefined ? linesA[i] : '';
+		const lineB = linesB[i] !== undefined ? linesB[i] : '';
+
+		if (lineA === lineB) {
+			//-- Same line
+			leftHtml += escapeHtml(lineA) + '\n';
+			rightHtml += escapeHtml(lineB) + '\n';
+		} else {
+			//-- Different lines
+			if (lineA && !lineB) {
+				leftHtml += `<span class="diff-removed">${escapeHtml(lineA)}</span>\n`;
+				rightHtml += '\n';
+			} else if (!lineA && lineB) {
+				leftHtml += '\n';
+				rightHtml += `<span class="diff-added">${escapeHtml(lineB)}</span>\n`;
+			} else {
+				//-- Both exist but different
+				leftHtml += `<span class="diff-changed">${escapeHtml(lineA)}</span>\n`;
+				rightHtml += `<span class="diff-changed">${escapeHtml(lineB)}</span>\n`;
+			}
+		}
+	}
+
+	return { left: leftHtml, right: rightHtml };
+}
+
+//-- === DUPLICATE CHECKER ===
+
+function checkDuplicates() {
+	const editor = document.getElementById("editor");
+	const code = editor.value;
+
+	if (!code.trim()) {
+		alert('Please enter some code to check for duplicates.');
+		return;
+	}
+
+	const duplicates = findDuplicates(code);
+	displayDuplicates(duplicates);
+}
+
+function findDuplicates(code) {
+	//-- Normalize the code
+	const normalized = code.replace(/\s+/g, ' ').trim();
+
+	//-- Find repeated patterns (substrings that appear more than once)
+	const patterns = new Map();
+	const minLength = 20; //-- Minimum length for a duplicate to be worth reporting
+
+	//-- Extract all substrings of reasonable length
+	for (let len = minLength; len <= normalized.length / 2; len++) {
+		for (let i = 0; i <= normalized.length - len; i++) {
+			const substring = normalized.substr(i, len);
+
+			//-- Skip if it's all whitespace or very simple
+			if (substring.trim().length < minLength) continue;
+
+			//-- Look for this substring elsewhere in the code
+			const firstIndex = normalized.indexOf(substring);
+			const lastIndex = normalized.lastIndexOf(substring);
+
+			if (firstIndex !== lastIndex && !patterns.has(substring)) {
+				//-- Found a duplicate
+				const occurrences = countOccurrences(normalized, substring);
+				if (occurrences > 1) {
+					patterns.set(substring, {
+						pattern: substring,
+						count: occurrences,
+						length: len
+					});
+				}
+			}
+		}
+	}
+
+	//-- Filter out subpatterns
+	const filtered = Array.from(patterns.values())
+		.sort((a, b) => b.length - a.length)
+		.filter((pattern, index, arr) => {
+			//-- Check if this pattern is contained in any longer pattern
+			for (let i = 0; i < index; i++) {
+				if (arr[i].pattern.includes(pattern.pattern)) {
+					return false;
+				}
+			}
+			return true;
+		})
+		.slice(0, 10); //-- Limit to top 10
+
+	return filtered;
+}
+
+function countOccurrences(str, substr) {
+	let count = 0;
+	let pos = 0;
+	while ((pos = str.indexOf(substr, pos)) !== -1) {
+		count++;
+		pos += substr.length;
+	}
+	return count;
+}
+
+function displayDuplicates(duplicates) {
+	const resultsPanel = document.getElementById('duplicateResults');
+
+	if (duplicates.length === 0) {
+		resultsPanel.innerHTML = `
+			<div class="duplicate-header">✅ No Significant Duplicates Found</div>
+			<p style="color: var(--color-gray-600);">Your code doesn't contain any repeated logic patterns.</p>
+		`;
+		resultsPanel.classList.add('visible');
+		return;
+	}
+
+	let html = `<div class="duplicate-header">⚠️ Found ${duplicates.length} Duplicate Pattern${duplicates.length > 1 ? 's' : ''}</div>`;
+
+	duplicates.forEach((dup, index) => {
+		//-- Format the pattern for display
+		const formatted = dup.pattern.length > 100
+			? dup.pattern.substr(0, 100) + '...'
+			: dup.pattern;
+
+		html += `
+			<div class="duplicate-item">
+				<div class="duplicate-title">Duplicate #${index + 1} (appears ${dup.count} times)</div>
+				<div class="duplicate-code">${escapeHtml(formatted)}</div>
+				<div class="duplicate-locations">
+					💡 Consider extracting this logic into a reusable function or variable.
+				</div>
+			</div>
+		`;
+	});
+
+	resultsPanel.innerHTML = html;
+	resultsPanel.classList.add('visible');
 }
