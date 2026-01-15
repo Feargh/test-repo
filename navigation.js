@@ -40,7 +40,7 @@ function createNavigation(currentPage) {
 						<span class="page-indicator"></span>
 						<span>Benefits Calculator</span>
 					</a>
-					<div class="nav-subsection ${currentPage === 'bc' || currentPage === 'bc-testing' || currentPage === 'bc-logic-checker' ? 'visible' : 'hidden'}">
+					<div class="nav-subsection ${currentPage === 'bc' || currentPage === 'bc-testing' || currentPage === 'bc-logic-checker' || currentPage === 'custom-testing' ? 'visible' : 'hidden'}">
 						<a href="bc-testing.html" class="nav-link nav-sublink ${currentPage === 'bc-testing' ? 'active' : ''}">
 							<span class="page-indicator"></span>
 							<span>Testing Page</span>
@@ -49,11 +49,11 @@ function createNavigation(currentPage) {
 							<span class="page-indicator"></span>
 							<span>Show/Hide Logic Checker</span>
 						</a>
+						<a href="custom-testing.html" class="nav-link nav-sublink ${currentPage === 'custom-testing' ? 'active' : ''}">
+							<span class="page-indicator"></span>
+							<span>Portal Testing</span>
+						</a>
 					</div>
-					<a href="custom-testing.html" class="nav-link page-nav-link ${currentPage === 'custom-testing' ? 'active' : ''}">
-						<span class="page-indicator"></span>
-						<span>Custom Testing</span>
-					</a>
 				</div>
 				${getPageSpecificSections(currentPage)}
 			</nav>
@@ -73,6 +73,13 @@ function createNavigation(currentPage) {
 				<path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 			</svg>
 			<span>Menu</span>
+		</button>
+
+		<!-- Desktop Collapse Button -->
+		<button class="desktop-collapse-btn" id="desktopCollapseBtn" title="Toggle sidebar">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+			</svg>
 		</button>
 	`;
 	
@@ -153,18 +160,25 @@ function initializeNavigation(currentPage) {
 function initializeMobileMenu() {
 	const sidebarToggle = document.getElementById("sidebarToggle");
 	const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+	const desktopCollapseBtn = document.getElementById("desktopCollapseBtn");
 	const sidebar = document.getElementById("sidebar");
 	const mobileBackdrop = document.getElementById("mobileBackdrop");
-	
+
+	//-- Check for saved sidebar state
+	const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+	if (sidebarCollapsed && window.innerWidth > 768) {
+		sidebar.classList.add('collapsed');
+	}
+
 	if (sidebar) {
-		//-- Toggle sidebar on button click
+		//-- Toggle sidebar on button click (mobile)
 		if (sidebarToggle) {
 			sidebarToggle.addEventListener("click", function(e) {
 				e.stopPropagation();
 				sidebar.classList.toggle("active");
 			});
 		}
-		
+
 		//-- Mobile menu button
 		if (mobileMenuBtn) {
 			mobileMenuBtn.addEventListener("click", function(e) {
@@ -172,14 +186,25 @@ function initializeMobileMenu() {
 				sidebar.classList.add("active");
 			});
 		}
-		
+
+		//-- Desktop collapse button
+		if (desktopCollapseBtn) {
+			desktopCollapseBtn.addEventListener("click", function(e) {
+				e.stopPropagation();
+				sidebar.classList.toggle("collapsed");
+				//-- Save state to localStorage
+				const isCollapsed = sidebar.classList.contains("collapsed");
+				localStorage.setItem('sidebarCollapsed', isCollapsed);
+			});
+		}
+
 		//-- Close sidebar when clicking backdrop
 		if (mobileBackdrop) {
 			mobileBackdrop.addEventListener("click", function() {
 				sidebar.classList.remove("active");
 			});
 		}
-		
+
 		//-- Close sidebar when clicking outside on mobile
 		document.addEventListener("click", function(event) {
 			if (window.innerWidth <= 768) {
@@ -188,7 +213,7 @@ function initializeMobileMenu() {
 				}
 			}
 		});
-		
+
 		//-- Handle window resize
 		let resizeTimer;
 		window.addEventListener("resize", function() {
@@ -196,6 +221,8 @@ function initializeMobileMenu() {
 			resizeTimer = setTimeout(function() {
 				if (window.innerWidth > 768) {
 					sidebar.classList.remove("active");
+				} else {
+					sidebar.classList.remove("collapsed");
 				}
 			}, 250);
 		});
