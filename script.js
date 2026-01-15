@@ -556,8 +556,9 @@ function validateExpression() {
 	warnings.push(...quoteResults.warnings);
 
 	//-- Check for operator issues
-	const operatorErrors = checkOperators(code);
-	errors.push(...operatorErrors);
+	const operatorResults = checkOperators(code);
+	errors.push(...operatorResults.errors);
+	warnings.push(...operatorResults.warnings);
 
 	//-- Check for expression validity
 	const expressionWarnings = checkExpressions(code);
@@ -676,6 +677,7 @@ function checkQuotes(code) {
 
 function checkOperators(code) {
 	const errors = [];
+	const warnings = [];
 	const lines = code.split('\n');
 
 	for (let lineNum = 0; lineNum < lines.length; lineNum++) {
@@ -720,9 +722,115 @@ function checkOperators(code) {
 				suggestion: 'Remove one of the || operators'
 			});
 		}
+
+		//-- Check for single & or | operators (bitwise vs logical)
+		//-- Look for single & that isn't part of &&
+		const singleAnd = /(?<!&)&(?!&)/g;
+		while ((match = singleAnd.exec(line)) !== null) {
+			if (!isInsideString(line, match.index)) {
+				warnings.push({
+					type: 'Operator Warning',
+					line: lineNum + 1,
+					col: match.index + 1,
+					message: 'Single "&" found - did you mean "&&" for logical AND?',
+					context: line,
+					suggestion: 'Use "&&" for logical AND operator. Single "&" is a bitwise operator in C#.'
+				});
+			}
+		}
+
+		//-- Look for single | that isn't part of ||
+		const singleOr = /(?<!\|)\|(?!\|)/g;
+		while ((match = singleOr.exec(line)) !== null) {
+			if (!isInsideString(line, match.index)) {
+				warnings.push({
+					type: 'Operator Warning',
+					line: lineNum + 1,
+					col: match.index + 1,
+					message: 'Single "|" found - did you mean "||" for logical OR?',
+					context: line,
+					suggestion: 'Use "||" for logical OR operator. Single "|" is a bitwise operator in C#.'
+				});
+			}
+		}
+
+		//-- Check for triple &&& or |||
+		if (/&&&/.test(line)) {
+			errors.push({
+				type: 'Operator Error',
+				line: lineNum + 1,
+				col: line.indexOf('&&&'),
+				message: 'Triple AND operator "&&&" found',
+				context: line,
+				suggestion: 'Use "&&" for logical AND'
+			});
+		}
+
+		if (/\|\|\|/.test(line)) {
+			errors.push({
+				type: 'Operator Error',
+				line: lineNum + 1,
+				col: line.indexOf('|||'),
+				message: 'Triple OR operator "|||" found',
+				context: line,
+				suggestion: 'Use "||" for logical OR'
+			});
+		}
+
+		//-- Check for misplaced NOT operator
+		if (/!\s*!/.test(line)) {
+			const doubleNotIndex = line.search(/!\s*!/);
+			if (!isInsideString(line, doubleNotIndex)) {
+				warnings.push({
+					type: 'Operator Warning',
+					line: lineNum + 1,
+					col: doubleNotIndex + 1,
+					message: 'Double negation "!!" found',
+					context: line,
+					suggestion: 'Double negation (!!) cancels out. Consider simplifying or verifying this is intentional.'
+				});
+			}
+		}
+
+		//-- Check for XOR operator usage (less common in logic expressions)
+		const xorOperator = /\^/g;
+		while ((match = xorOperator.exec(line)) !== null) {
+			if (!isInsideString(line, match.index)) {
+				//-- Make sure it's not part of a string or variable name
+				const prevChar = match.index > 0 ? line[match.index - 1] : ' ';
+				const nextChar = match.index < line.length - 1 ? line[match.index + 1] : ' ';
+				if (!/[a-zA-Z0-9_]/.test(prevChar) && !/[a-zA-Z0-9_]/.test(nextChar)) {
+					warnings.push({
+						type: 'Operator Warning',
+						line: lineNum + 1,
+						col: match.index + 1,
+						message: 'XOR operator "^" found',
+						context: line,
+						suggestion: 'The "^" operator is XOR (exclusive OR) in C#. Verify this is the intended logical operation.'
+					});
+				}
+			}
+		}
+
+		//-- Check for mixed bitwise and logical operators on same line
+		const hasBitwiseAnd = /(?<!&)&(?!&)/.test(line);
+		const hasLogicalAnd = /&&/.test(line);
+		const hasBitwiseOr = /(?<!\|)\|(?!\|)/.test(line);
+		const hasLogicalOr = /\|\|/.test(line);
+
+		if ((hasBitwiseAnd && hasLogicalAnd) || (hasBitwiseOr && hasLogicalOr)) {
+			errors.push({
+				type: 'Operator Error',
+				line: lineNum + 1,
+				col: 1,
+				message: 'Mixed bitwise and logical operators on same line',
+				context: line,
+				suggestion: 'Mixing bitwise (&, |) and logical (&&, ||) operators can be confusing. Use consistent operators.'
+			});
+		}
 	}
 
-	return errors;
+	return { errors, warnings };
 }
 
 function checkExpressions(code) {
