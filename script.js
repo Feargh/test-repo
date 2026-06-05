@@ -15,6 +15,24 @@ function createiFrame(URL, id = "", environment = "") {
 	iframe.id = new Date().getTime();
 	iframe.width = "100%";
 	iframe.height = "1399px";
+	iframe.setAttribute("scrolling", "no");
+
+	window.addEventListener("message", function (e) {
+		if (e.source !== iframe.contentWindow) return;
+		if ("resize" === e.data.name && e.data.value > 780) {
+			iframe.height = e.data.value + "px";
+		}
+		if ("scroll" === e.data.name) {
+			var bodyRect = document.body.getBoundingClientRect();
+			var elemRect = iframe.getBoundingClientRect();
+			var offset = elemRect.top - bodyRect.top;
+			window.scrollY
+				? window.scroll(0, offset)
+				: document.documentElement.scrollTop
+					? (document.documentElement.scrollTop = offset)
+					: document.body.scrollTop && (document.body.scrollTop = offset);
+		}
+	}, false);
 
 	const params = new URLSearchParams(URL);
 	if (params.has("amp;id")) {
@@ -75,6 +93,7 @@ function createiFrame(URL, id = "", environment = "") {
 
 	var iframeContainer = document.getElementById("iframe-container");
 	iframeContainer.appendChild(container);
+
 }
 
 function newiFrameURL(environment, id, testing) {
@@ -389,7 +408,7 @@ function updateBCButtonStates(activeEnvironment) {
 
 //-- Setup iframe resize functionality for BC
 function setupBCIframeResize() {
-	const bcIframe = document.getElementById("bc-iframe");
+	const bcIframe = document.getElementById("t2u-iframe");
 	if (!bcIframe) return;
 
 	//-- Listen for messages from the iframe

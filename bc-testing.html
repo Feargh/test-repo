@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -23,21 +23,45 @@
 					<div class="iframe-header glass">
 						<div class="iframe-header-content">
 							<h2 class="iframe-title">Benefits Calculator Testing</h2>
-							<span class="environment-badge" id="current-env-bc">UAT Environment</span>
+							<span class="environment-badge" id="current-env-bc"
+								>UAT Environment</span
+							>
 						</div>
 					</div>
 					<div class="iframe-container glass">
 						<div class="url-preview-bar">
-							<input type="text" id="bc-url-preview" class="url-preview-input" readonly value="https://uat-beta-benefits-calculator.turn2us.org.uk/survey/?portal=true&id=unknown" />
-							<button class="btn-glass btn-copy" onclick="copyToClipboard('bc-url-preview')" title="Copy URL">
-								<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<path d="M8 3H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2M8 3a2 2 0 002 2h2a2 2 0 002-2M8 3a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v6a2 2 0 01-2 2h-8a2 2 0 01-2-2V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							<input
+								type="text"
+								id="bc-url-preview"
+								class="url-preview-input"
+								readonly
+								value="https://uat-beta-benefits-calculator.turn2us.org.uk/survey/?portal=true&id=unknown"
+							/>
+							<button
+								class="btn-glass btn-copy"
+								onclick="copyToClipboard('bc-url-preview')"
+								title="Copy URL"
+							>
+								<svg
+									width="20"
+									height="20"
+									viewBox="0 0 20 20"
+									fill="none"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path
+										d="M8 3H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2M8 3a2 2 0 002 2h2a2 2 0 002-2M8 3a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v6a2 2 0 01-2 2h-8a2 2 0 01-2-2V9"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									/>
 								</svg>
 								<span>Copy</span>
 							</button>
 						</div>
 						<iframe
-							id="bc-iframe"
+							id="t2u-iframe"
 							src="https://uat-beta-benefits-calculator.turn2us.org.uk/survey/?portal=true&id=unknown"
 							frameborder="0"
 							scrolling="no"
@@ -54,8 +78,8 @@
 		<script src="navigation.js"></script>
 		<script>
 			//-- Initialize navigation for BC Testing page
-			document.addEventListener("DOMContentLoaded", function() {
-				initializeNavigation('bc-testing');
+			document.addEventListener("DOMContentLoaded", function () {
+				initializeNavigation("bc-testing");
 			});
 		</script>
 		<script
