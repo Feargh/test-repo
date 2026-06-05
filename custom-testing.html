@@ -27,85 +27,63 @@
 						</p>
 					</div>
 					
-					<!-- Control Panel -->
-					<div class="control-panel glass">
-						<div class="control-buttons">
-							<button
-								type="button"
-								class="btn-glass btn-secondary"
-								onClick="hideShow('createPortal')"
-							>
-								Create New Portal
-							</button>
-						</div>
+					<!-- Add Panel Bar -->
+					<div class="add-panel-bar glass">
+						<form class="add-panel-form" onsubmit="return addiFrame(event)">
 
-						<!-- Create Portal Form -->
-						<form
-							id="createPortal"
-							class="portal-form glass"
-							onsubmit="return addiFrame(event)"
-							style="display: none"
-						>
-							<h3 class="form-title">Create new portal</h3>
-							
-							<div class="form-grid">
-								<div class="form-group">
-									<label for="portalId">Portal ID:</label>
-									<input
-										class="form-input"
-										type="text"
-										name="portalId"
-										id="portalId"
-										placeholder="Enter Portal ID"
-									/>
-									<small class="form-hint">Leave blank to use a Turn2us branded portal</small>
-								</div>
-								
-								<div class="form-group">
-									<label>Environment:</label>
-									<div class="radio-group">
-										<label class="radio-label">
-											<input
-												type="radio"
-												name="environment"
-												value="production"
-												checked
-											/>
-											<span>Production</span>
-										</label>
-										<label class="radio-label">
-											<input type="radio" name="environment" value="uat" />
-											<span>UAT</span>
-										</label>
-										<label class="radio-label">
-											<input type="radio" name="environment" value="staging" />
-											<span>Staging</span>
-										</label>
-										<label class="radio-label">
-											<input type="radio" name="environment" value="local" />
-											<span>Local</span>
-										</label>
-									</div>
-								</div>
-								
-								<div class="form-group">
-									<label>Testing Mode:</label>
-									<div class="radio-group">
-										<label class="radio-label">
-											<input type="radio" name="testing" value="true" />
-											<span>On</span>
-										</label>
-										<label class="radio-label">
-											<input type="radio" name="testing" value="false" checked />
-											<span>Off</span>
-										</label>
-									</div>
+							<div class="apf-group">
+								<span class="apf-label">Environment</span>
+								<div class="apf-segmented">
+									<label class="apf-seg-item">
+										<input type="radio" name="environment" value="uat" checked />
+										<span>UAT</span>
+									</label>
+									<label class="apf-seg-item">
+										<input type="radio" name="environment" value="staging" />
+										<span>Staging</span>
+									</label>
+									<label class="apf-seg-item">
+										<input type="radio" name="environment" value="production" />
+										<span>Live</span>
+									</label>
+									<label class="apf-seg-item">
+										<input type="radio" name="environment" value="local" />
+										<span>Local</span>
+									</label>
 								</div>
 							</div>
-							
-							<button class="btn-glass btn-primary" type="submit">
-								Create Portal
-							</button>
+
+							<div class="apf-divider"></div>
+
+							<div class="apf-group apf-group--grow">
+								<label class="apf-label" for="portalId">Portal ID</label>
+								<input
+									class="apf-input"
+									type="text"
+									name="portalId"
+									id="portalId"
+									placeholder="e.g. abc123"
+								/>
+							</div>
+
+							<div class="apf-divider"></div>
+
+							<div class="apf-group">
+								<span class="apf-label">Test Mode</span>
+								<div class="apf-segmented">
+									<label class="apf-seg-item">
+										<input type="radio" name="testing" value="false" checked />
+										<span>Off</span>
+									</label>
+									<label class="apf-seg-item">
+										<input type="radio" name="testing" value="true" />
+										<span>On</span>
+									</label>
+								</div>
+							</div>
+
+							<button class="apf-add-btn" type="submit">+ Add Panel</button>
+
 						</form>
 					</div>
 				</section>

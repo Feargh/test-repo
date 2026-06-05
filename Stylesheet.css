@@ -1638,6 +1638,127 @@ a:focus-visible {
     cursor: pointer;
 }
 
+/* Add Panel Bar */
+.add-panel-bar {
+    height: 85px;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.add-panel-form {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    gap: 0;
+}
+
+.apf-divider {
+    width: 1px;
+    height: 100%;
+    background: var(--color-gray-200);
+    margin: 0 var(--spacing-lg);
+    flex-shrink: 0;
+}
+
+.apf-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.apf-group--grow {
+    flex: 1;
+    min-width: 0;
+}
+
+.apf-label {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--color-gray-900);
+}
+
+.apf-segmented {
+    display: flex;
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.apf-seg-item {
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.apf-seg-item input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.apf-seg-item span {
+    display: block;
+    padding: 5px 14px;
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+    white-space: nowrap;
+    border-right: 1px solid var(--color-gray-300);
+    transition: background 0.15s, color 0.15s;
+    line-height: 1.4;
+}
+
+.apf-seg-item:last-child span {
+    border-right: none;
+}
+
+.apf-seg-item input:checked + span {
+    background: var(--color-gray-800);
+    color: #fff;
+}
+
+.apf-input {
+    width: 100%;
+    padding: 6px var(--spacing-md);
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--color-gray-800);
+    font-size: var(--font-size-base);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.apf-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(217, 63, 0, 0.1);
+}
+
+.apf-add-btn {
+    margin-left: var(--spacing-lg);
+    margin-top: 16px;
+    padding: 10px 20px;
+    background: #1f7a40;
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.apf-add-btn:hover {
+    background: #185f31;
+}
+
 .iframe-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
