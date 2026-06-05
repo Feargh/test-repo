@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta
+			name="description"
+			content="Use the free Benefits Calculator to find out which benefits and grants you may be able to claim. Provided in partnership with Turn2us."
+		/>
+		<meta name="theme-color" content="rgb(47, 93, 75)" />
+		<meta name="robots" content="noindex, nofollow" />
+		<title>Benefits Calculator - Example Partner Site</title>
+		<link
+			rel="icon"
+			type="image/svg+xml"
+			href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='rgb(47,93,75)'/><rect x='8.5' y='7.5' width='3' height='9' rx='0.75' fill='white'/><rect x='12.5' y='7.5' width='3' height='9' rx='0.75' fill='white'/></svg>"
+		/>
+		<link rel="stylesheet" href="bc-portal-example.css" />
+		<!-- <script>
+		(function () {
+			var themes = ['', 'theme-gold', 'theme-purple'];
+			var theme = themes[Math.floor(Math.random() * themes.length)];
+			if (theme) document.documentElement.classList.add(theme);
+			var themeColors = { 'theme-gold': 'rgb(176, 138, 62)', 'theme-purple': 'rgb(88, 56, 148)' };
+			if (themeColors[theme]) document.querySelector('meta[name="theme-color"]').content = themeColors[theme];
+		})();
+	</script> -->
+	</head>
+	<body>
+		<a class="skip-link" href="#main-content">Skip to main content</a>
+
+		<!-- Demo notice - visible to the internal team, not a real client page -->
+		<div class="demo-banner">Demo — partner iframe preview</div>
+
+		<!-- ── Header ── -->
+		<header class="site-header">
+			<div class="header-inner">
+				<a href="#" class="site-logo">
+					<div class="logo-mark">
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"
+								fill="currentColor"
+							/>
+						</svg>
+					</div>
+					<div class="logo-name">
+						Example Charity
+						<span>Supporting our community</span>
+					</div>
+				</a>
+				<nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+					<a href="#">Home</a>
+					<a href="#">About Us</a>
+					<a href="#">Our Services</a>
+					<a href="#" class="active">Benefits Support</a>
+					<a href="#">Contact</a>
+				</nav>
+				<button
+					class="nav-toggle"
+					aria-label="Open menu"
+					aria-expanded="false"
+					aria-controls="site-nav"
+				>
+					<span></span>
+					<span></span>
+					<span></span>
+				</button>
+			</div>
+		</header>
+		<div class="nav-backdrop" id="nav-backdrop"></div>
+
+		<!-- ── Page Intro ── -->
+		<section class="page-intro">
+			<div class="intro-inner">
+				<h1>Check what benefits you could be entitled to</h1>
+				<p>
+					Use the free Benefits Calculator below, provided by Turn2us, to find
+					out which benefits and grants you may be able to claim. It only takes
+					a few minutes and your information is kept private.
+				</p>
+			</div>
+		</section>
+		<!-- ── Portal Iframe ── -->
+		<main class="portal-section" id="main-content">
+			<div
+				class="portal-marker portal-marker--start"
+				id="portal-marker-start"
+				hidden
+			>
+				This is the start of the iframe
+			</div>
+			<div class="portal-wrapper">
+				<iframe
+					id="t2u-iframe"
+					src="https://portal-benefits-calculator.turn2us.org.uk/survey/?portal=true"
+					frameborder="0"
+					scrolling="no"
+					title="Benefits Calculator"
+				>
+					<p>Your browser does not support iframes.</p>
+				</iframe>
+			</div>
+			<div
+				class="portal-marker portal-marker--end"
+				id="portal-marker-end"
+				hidden
+			>
+				This is the end of the iframe
+			</div>
+		</main>
+
+		<!-- ── Theme Switcher (Demo Tool) ── -->
+		<section class="theme-switcher">
+			<div class="theme-switcher-inner">
+				<div class="theme-switcher-title">
+					<svg
+						width="14"
+						height="14"
+						viewBox="0 0 24 24"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+						aria-hidden="true"
+					>
+						<path
+							d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10c0 2.5-2 4-4 4h-1.5c-.828 0-1.5.672-1.5 1.5 0 .394.144.756.403 1.028.259.272.597.472.597.972 0 1.105-.895 2.5-4 2.5z"
+							stroke="currentColor"
+							stroke-width="2"
+						/>
+						<circle cx="8" cy="13" r="1.5" fill="currentColor" />
+						<circle cx="9.5" cy="9" r="1.5" fill="currentColor" />
+						<circle cx="14.5" cy="8.5" r="1.5" fill="currentColor" />
+						<circle cx="16.5" cy="12.5" r="1.5" fill="currentColor" />
+					</svg>
+					Partner theme
+				</div>
+				<div class="theme-groups">
+					<div class="theme-group">
+						<div class="theme-buttons">
+							<button
+								class="theme-btn theme-btn--active"
+								data-portal-id=""
+								onclick="applyPortalId('')"
+							>
+								Turn2us
+							</button>
+							<button
+								class="theme-btn"
+								data-portal-id="retail_trust_live"
+								onclick="applyPortalId('retail_trust_live')"
+							>
+								Example 1
+							</button>
+							<button
+								class="theme-btn"
+								data-portal-id="cap_live"
+								onclick="applyPortalId('cap_live')"
+							>
+								Example 2
+							</button>
+							<button
+								class="theme-btn"
+								data-portal-id="liverpoolcityregion_live"
+								onclick="applyPortalId('liverpoolcityregion_live')"
+							>
+								Example 3
+							</button>
+						</div>
+					</div>
+					<div class="theme-group theme-group--divided">
+						<button
+							class="portal-marker-toggle"
+							onclick="togglePortalMarkers()"
+							aria-pressed="false"
+						>
+							Show iframe boundaries
+						</button>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- ── Footer ── -->
+		<footer class="site-footer">
+			<div class="footer-inner">
+				<div class="footer-about">
+					<div class="footer-org-name">Example Charity</div>
+					<p>
+						We help people access the support they need. Our advisers are
+						available Monday to Friday, 9am–5pm to help you understand your
+						options.
+					</p>
+				</div>
+				<div class="footer-links">
+					<h4>Quick Links</h4>
+					<ul>
+						<li><a href="#">Home</a></li>
+						<li><a href="#">Our Services</a></li>
+						<li><a href="#">Benefits Support</a></li>
+						<li><a href="#">Contact Us</a></li>
+					</ul>
+				</div>
+				<div class="footer-links">
+					<h4>Legal</h4>
+					<ul>
+						<li><a href="#">Privacy Policy</a></li>
+						<li><a href="#">Cookie Policy</a></li>
+						<li><a href="#">Accessibility</a></li>
+						<li><a href="#">Terms of Use</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="footer-base">
+				<span
+					>&copy; <span id="copyright-year"></span> Example Charity. Registered
+					charity no. 000000.</span
+				>
+			</div>
+		</footer>
+
+		<script src="script.js"></script>
+		<script>
+			document.getElementById("copyright-year").textContent =
+				new Date().getFullYear();
+
+			var navToggle = document.querySelector(".nav-toggle");
+			var siteNav = document.getElementById("site-nav");
+			var navBackdrop = document.getElementById("nav-backdrop");
+
+			navToggle.addEventListener("click", function () {
+				var isOpen = siteNav.classList.toggle("is-open");
+				navBackdrop.classList.toggle("is-open", isOpen);
+				navToggle.setAttribute("aria-expanded", String(isOpen));
+				navToggle.setAttribute(
+					"aria-label",
+					isOpen ? "Close menu" : "Open menu",
+				);
+			});
+
+			navBackdrop.addEventListener("click", closeMenu);
+
+			siteNav.querySelectorAll("a").forEach(function (link) {
+				link.addEventListener("click", closeMenu);
+			});
+
+			document.addEventListener("keydown", function (e) {
+				if (e.key === "Escape" && siteNav.classList.contains("is-open")) {
+					closeMenu();
+					navToggle.focus();
+				}
+			});
+
+			function closeMenu() {
+				siteNav.classList.remove("is-open");
+				navBackdrop.classList.remove("is-open");
+				navToggle.setAttribute("aria-expanded", "false");
+				navToggle.setAttribute("aria-label", "Open menu");
+			}
+
+			var basePortalUrl =
+				"https://portal-benefits-calculator.turn2us.org.uk/survey/?portal=true";
+
+			function applyPortalId(id) {
+				var iframe = document.getElementById("t2u-iframe");
+				iframe.src = id ? basePortalUrl + "&id=" + id : basePortalUrl;
+				document.querySelectorAll("[data-portal-id]").forEach(function (btn) {
+					btn.classList.toggle(
+						"theme-btn--active",
+						btn.dataset.portalId === id,
+					);
+				});
+			}
+
+			function togglePortalMarkers() {
+				var btn = document.querySelector(".portal-marker-toggle");
+				var start = document.getElementById("portal-marker-start");
+				var end = document.getElementById("portal-marker-end");
+				var visible = !start.hidden;
+				start.hidden = visible;
+				end.hidden = visible;
+				btn.setAttribute("aria-pressed", String(!visible));
+				btn.textContent = visible
+					? "Show iframe boundaries"
+					: "Hide iframe boundaries";
+			}
+		</script>
+		<script
+			src="https://portal-benefits-calculator.turn2us.org.uk/static/js/portal.min.js"
+			crossorigin="anonymous"
+		></script>
+	</body>
+</html>

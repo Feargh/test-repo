@@ -40,7 +40,7 @@ function createNavigation(currentPage) {
 						<span class="page-indicator"></span>
 						<span>Benefits Calculator</span>
 					</a>
-					<div class="nav-subsection ${currentPage === 'bc' || currentPage === 'bc-testing' || currentPage === 'bc-logic-checker' || currentPage === 'custom-testing' ? 'visible' : 'hidden'}">
+					<div class="nav-subsection ${currentPage === 'bc' || currentPage === 'bc-testing' || currentPage === 'bc-logic-checker' || currentPage === 'custom-testing' || currentPage === 'bc-portal-example' ? 'visible' : 'hidden'}">
 						<a href="bc-testing.html" class="nav-link nav-sublink ${currentPage === 'bc-testing' ? 'active' : ''}">
 							<span class="page-indicator"></span>
 							<span>Testing Page</span>
@@ -52,6 +52,10 @@ function createNavigation(currentPage) {
 						<a href="custom-testing.html" class="nav-link nav-sublink ${currentPage === 'custom-testing' ? 'active' : ''}">
 							<span class="page-indicator"></span>
 							<span>Portal Testing</span>
+						</a>
+						<a href="bc-portal-example.html" class="nav-link nav-sublink ${currentPage === 'bc-portal-example' ? 'active' : ''}">
+							<span class="page-indicator"></span>
+							<span>Portal Example</span>
 						</a>
 					</div>
 				</div>
