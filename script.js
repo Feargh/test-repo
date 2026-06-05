@@ -99,7 +99,7 @@ function addiFrame(event) {
 
 	const id = document.getElementById("portalId").value;
 	const environment = document.querySelector(
-		'input[name="environment"]:checked'
+		'input[name="environment"]:checked',
 	).value;
 
 	const testing = document.querySelector('input[name="testing"]:checked').value;
@@ -141,18 +141,18 @@ let currentPIPEnvironment = "uat"; //-- Track current environment
 
 function switchPIPEnvironment(environment) {
 	console.log("Switching PIP environment to: " + environment);
-	
+
 	//-- Update current environment
 	currentPIPEnvironment = environment;
-	
+
 	//-- Get iframe element
 	const iframe = document.getElementById("pip-iframe");
-	
+
 	//-- Set base URLs based on environment
 	let baseURL;
 	let scriptURL;
-	
-	switch(environment) {
+
+	switch (environment) {
 		case "staging":
 			baseURL = "https://staging-pip.turn2us.org.uk/?portal=true&id=unknown";
 			scriptURL = "https://staging-pip.turn2us.org.uk/static/js/portal.min.js";
@@ -163,7 +163,8 @@ function switchPIPEnvironment(environment) {
 			break;
 		case "local":
 			baseURL = "http://local-pip.turn2us.org.uk:3000/?portal=true&id=unknown";
-			scriptURL = "http://local-pip.turn2us.org.uk:3000/static/js/portal.min.js";
+			scriptURL =
+				"http://local-pip.turn2us.org.uk:3000/static/js/portal.min.js";
 			break;
 		case "uat":
 		default:
@@ -171,25 +172,25 @@ function switchPIPEnvironment(environment) {
 			scriptURL = "https://uat-pip.turn2us.org.uk/static/js/portal.min.js";
 			break;
 	}
-	
+
 	//-- Update iframe src
 	iframe.src = baseURL;
-	
+
 	//-- Update URL preview
 	updatePIPUrlPreview(baseURL);
-	
+
 	//-- Update portal script
 	const existingScript = document.getElementById("pip-portal-script");
 	if (existingScript) {
 		existingScript.remove();
 	}
-	
+
 	//-- Create new script element
 	const newScript = document.createElement("script");
 	newScript.id = "pip-portal-script";
 	newScript.src = scriptURL;
 	document.body.appendChild(newScript);
-	
+
 	//-- Update button states
 	updatePIPButtonStates(environment);
 }
@@ -197,33 +198,34 @@ function switchPIPEnvironment(environment) {
 function updatePIPButtonStates(activeEnvironment) {
 	//-- Remove active class from all buttons
 	const buttons = document.querySelectorAll(".pip-env-btn");
-	buttons.forEach(btn => {
+	buttons.forEach((btn) => {
 		btn.classList.remove("active");
 	});
-	
+
 	//-- Add active class to current button
 	const activeButton = document.getElementById(`pip-${activeEnvironment}-btn`);
 	if (activeButton) {
 		activeButton.classList.add("active");
 	}
-	
+
 	//-- Update environment badge
 	const envBadge = document.getElementById("current-env");
 	if (envBadge) {
-		const envName = activeEnvironment.charAt(0).toUpperCase() + activeEnvironment.slice(1);
+		const envName =
+			activeEnvironment.charAt(0).toUpperCase() + activeEnvironment.slice(1);
 		envBadge.textContent = `${envName} Environment`;
 	}
 }
 
 //-- Initialize page-specific functionality
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
 	//-- Setup iframe resize listener for PIP page
 	if (document.getElementById("pip-iframe")) {
 		setupIframeResize();
 	}
-	
+
 	//-- Setup iframe resize listener for BC page
-	if (document.getElementById("bc-iframe")) {
+	if (document.getElementById("t2u-iframe")) {
 		setupBCIframeResize();
 	}
 });
@@ -233,7 +235,7 @@ function resizeIframe(iframe) {
 	//-- Try to access iframe content height (won't work for cross-origin)
 	try {
 		const newHeight = iframe.contentWindow.document.body.scrollHeight;
-		iframe.style.height = newHeight + 'px';
+		iframe.style.height = newHeight + "px";
 	} catch (e) {
 		//-- For cross-origin, we rely on postMessage
 	}
@@ -243,50 +245,50 @@ function resizeIframe(iframe) {
 function setupIframeResize() {
 	const pipIframe = document.getElementById("pip-iframe");
 	if (!pipIframe) return;
-	
+
 	//-- Listen for messages from the iframe
-	window.addEventListener("message", function(e) {
+	window.addEventListener("message", function (e) {
 		//-- Check if message contains height data
 		if (e.data && (e.data.height || e.data.frameHeight)) {
 			const height = e.data.height || e.data.frameHeight;
 			pipIframe.style.height = height + "px";
 		}
-		
+
 		//-- Also check for Turn2us specific resize messages
 		if (e.data && e.data.type === "resize" && e.data.height) {
 			pipIframe.style.height = e.data.height + "px";
 		}
-		
+
 		//-- Check for navigation/URL change messages
 		if (e.data && e.data.type === "urlChange" && e.data.url) {
 			updatePIPUrlPreview(e.data.url);
 		}
-		
+
 		//-- Check for Turn2us portal navigation events
 		if (e.data && e.data.type === "navigation" && e.data.url) {
 			updatePIPUrlPreview(e.data.url);
 		}
-		
+
 		//-- Check for Turn2us route change events
 		if (e.data && e.data.type === "routeChange" && e.data.path) {
-			const baseUrl = pipIframe.src.split('?')[0].split('#')[0];
+			const baseUrl = pipIframe.src.split("?")[0].split("#")[0];
 			const newUrl = baseUrl + e.data.path;
 			updatePIPUrlPreview(newUrl);
 		}
-		
+
 		//-- Check if the message contains a URL property
-		if (e.data && e.data.url && typeof e.data.url === 'string') {
+		if (e.data && e.data.url && typeof e.data.url === "string") {
 			updatePIPUrlPreview(e.data.url);
 		}
-		
+
 		//-- Check for location property
-		if (e.data && e.data.location && typeof e.data.location === 'string') {
+		if (e.data && e.data.location && typeof e.data.location === "string") {
 			updatePIPUrlPreview(e.data.location);
 		}
 	});
-	
+
 	//-- Listen for iframe load events to update URL
-	pipIframe.addEventListener('load', function() {
+	pipIframe.addEventListener("load", function () {
 		try {
 			//-- Try to get the current URL from iframe
 			const iframeUrl = pipIframe.contentWindow.location.href;
@@ -296,14 +298,14 @@ function setupIframeResize() {
 			updatePIPUrlPreview(pipIframe.src);
 		}
 	});
-	
+
 	//-- Periodically check if we need to resize (fallback for iframes that don't send messages)
-	setInterval(function() {
+	setInterval(function () {
 		try {
 			const currentHeight = parseInt(pipIframe.style.height) || 0;
 			const contentHeight = pipIframe.contentWindow.document.body.scrollHeight;
 			if (contentHeight && contentHeight !== currentHeight) {
-				pipIframe.style.height = contentHeight + 'px';
+				pipIframe.style.height = contentHeight + "px";
 			}
 		} catch (e) {
 			//-- Cross-origin, can't access content
@@ -324,38 +326,41 @@ let currentBCEnvironment = "uat"; //-- Track current environment
 
 function switchBCEnvironment(environment) {
 	console.log("Switching BC environment to: " + environment);
-	
+
 	//-- Update current environment
 	currentBCEnvironment = environment;
-	
+
 	//-- Get iframe element
-	const iframe = document.getElementById("bc-iframe");
-	
+	const iframe = document.getElementById("t2u-iframe");
+
 	//-- Set base URLs based on environment
 	let baseURL;
-	
-	switch(environment) {
+
+	switch (environment) {
 		case "staging":
-			baseURL = "https://staging-beta-benefits-calculator.turn2us.org.uk/?portal=true&id=unknown";
+			baseURL =
+				"https://staging-beta-benefits-calculator.turn2us.org.uk/?portal=true&id=unknown";
 			break;
 		case "live":
-			baseURL = "https://benefits-calculator.turn2us.org.uk/?portal=true&id=unknown";
+			baseURL =
+				"https://benefits-calculator.turn2us.org.uk/?portal=true&id=unknown";
 			break;
 		case "local":
 			baseURL = "https://bcv2.turn2us.org.uk:3000/?portal=true&id=unknown";
 			break;
 		case "uat":
 		default:
-			baseURL = "https://uat-beta-benefits-calculator.turn2us.org.uk/?portal=true&id=unknown";
+			baseURL =
+				"https://uat-beta-benefits-calculator.turn2us.org.uk/?portal=true&id=unknown";
 			break;
 	}
-	
+
 	//-- Update iframe src
 	iframe.src = baseURL;
-	
+
 	//-- Update URL preview
 	updateBCUrlPreview(baseURL);
-	
+
 	//-- Update button states
 	updateBCButtonStates(environment);
 }
@@ -363,20 +368,21 @@ function switchBCEnvironment(environment) {
 function updateBCButtonStates(activeEnvironment) {
 	//-- Remove active class from all buttons
 	const buttons = document.querySelectorAll(".bc-env-btn");
-	buttons.forEach(btn => {
+	buttons.forEach((btn) => {
 		btn.classList.remove("active");
 	});
-	
+
 	//-- Add active class to current button
 	const activeButton = document.getElementById(`bc-${activeEnvironment}-btn`);
 	if (activeButton) {
 		activeButton.classList.add("active");
 	}
-	
+
 	//-- Update environment badge
 	const envBadge = document.getElementById("current-env-bc");
 	if (envBadge) {
-		const envName = activeEnvironment.charAt(0).toUpperCase() + activeEnvironment.slice(1);
+		const envName =
+			activeEnvironment.charAt(0).toUpperCase() + activeEnvironment.slice(1);
 		envBadge.textContent = `${envName} Environment`;
 	}
 }
@@ -385,45 +391,45 @@ function updateBCButtonStates(activeEnvironment) {
 function setupBCIframeResize() {
 	const bcIframe = document.getElementById("bc-iframe");
 	if (!bcIframe) return;
-	
+
 	//-- Listen for messages from the iframe
-	window.addEventListener("message", function(e) {
+	window.addEventListener("message", function (e) {
 		//-- Check if message contains height data
 		if (e.data && (e.data.height || e.data.frameHeight)) {
 			const height = e.data.height || e.data.frameHeight;
 			bcIframe.style.height = height + "px";
 		}
-		
+
 		//-- Check for navigation/URL change messages
 		if (e.data && e.data.type === "urlChange" && e.data.url) {
 			updateBCUrlPreview(e.data.url);
 		}
-		
+
 		//-- Check for Turn2us portal navigation events
 		if (e.data && e.data.type === "navigation" && e.data.url) {
 			updateBCUrlPreview(e.data.url);
 		}
-		
+
 		//-- Check for Turn2us route change events
 		if (e.data && e.data.type === "routeChange" && e.data.path) {
-			const baseUrl = bcIframe.src.split('?')[0].split('#')[0];
+			const baseUrl = bcIframe.src.split("?")[0].split("#")[0];
 			const newUrl = baseUrl + e.data.path;
 			updateBCUrlPreview(newUrl);
 		}
-		
+
 		//-- Check if the message contains a URL property
-		if (e.data && e.data.url && typeof e.data.url === 'string') {
+		if (e.data && e.data.url && typeof e.data.url === "string") {
 			updateBCUrlPreview(e.data.url);
 		}
-		
+
 		//-- Check for location property
-		if (e.data && e.data.location && typeof e.data.location === 'string') {
+		if (e.data && e.data.location && typeof e.data.location === "string") {
 			updateBCUrlPreview(e.data.location);
 		}
 	});
-	
+
 	//-- Listen for iframe load events to update URL
-	bcIframe.addEventListener('load', function() {
+	bcIframe.addEventListener("load", function () {
 		try {
 			//-- Try to get the current URL from iframe
 			const iframeUrl = bcIframe.contentWindow.location.href;
@@ -433,7 +439,7 @@ function setupBCIframeResize() {
 			updateBCUrlPreview(bcIframe.src);
 		}
 	});
-	
+
 	//-- Set initial height
 	bcIframe.style.minHeight = "100vh";
 }
@@ -456,33 +462,37 @@ function copyToClipboard(inputId) {
 	input.setSelectionRange(0, 99999); //-- For mobile devices
 
 	//-- Copy the text
-	navigator.clipboard.writeText(input.value).then(function() {
-		console.log("URL copied to clipboard:", input.value);
+	navigator.clipboard.writeText(input.value).then(
+		function () {
+			console.log("URL copied to clipboard:", input.value);
 
-		//-- Show feedback
-		const copyButton = input.nextElementSibling;
-		if (copyButton && copyButton.classList.contains('btn-copy')) {
-			const originalHTML = copyButton.innerHTML;
-			copyButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l3 3L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Copied!</span>';
-			copyButton.classList.add('copied');
+			//-- Show feedback
+			const copyButton = input.nextElementSibling;
+			if (copyButton && copyButton.classList.contains("btn-copy")) {
+				const originalHTML = copyButton.innerHTML;
+				copyButton.innerHTML =
+					'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l3 3L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Copied!</span>';
+				copyButton.classList.add("copied");
 
-			//-- Reset after 2 seconds
-			setTimeout(function() {
-				copyButton.innerHTML = originalHTML;
-				copyButton.classList.remove('copied');
-			}, 2000);
-		}
-	}, function(err) {
-		console.error("Could not copy text:", err);
+				//-- Reset after 2 seconds
+				setTimeout(function () {
+					copyButton.innerHTML = originalHTML;
+					copyButton.classList.remove("copied");
+				}, 2000);
+			}
+		},
+		function (err) {
+			console.error("Could not copy text:", err);
 
-		//-- Fallback for older browsers
-		try {
-			document.execCommand('copy');
-			console.log("URL copied using fallback method");
-		} catch (e) {
-			console.error("Fallback copy method also failed:", e);
-		}
-	});
+			//-- Fallback for older browsers
+			try {
+				document.execCommand("copy");
+				console.log("URL copied using fallback method");
+			} catch (e) {
+				console.error("Fallback copy method also failed:", e);
+			}
+		},
+	);
 }
 
 //-- ===========================
@@ -490,7 +500,7 @@ function copyToClipboard(inputId) {
 //-- ===========================
 
 //-- Initialize logic validator if on the logic checker page
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
 	const editor = document.getElementById("editor");
 	const lineNumbers = document.getElementById("lineNumbers");
 	const errorsPanel = document.getElementById("errorsPanel");
@@ -501,15 +511,17 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 
 	//-- Initialize version management
-	window.savedVersions = JSON.parse(localStorage.getItem('logicValidatorVersions') || '[]');
+	window.savedVersions = JSON.parse(
+		localStorage.getItem("logicValidatorVersions") || "[]",
+	);
 
 	//-- Setup event listeners
-	editor.addEventListener('input', function() {
+	editor.addEventListener("input", function () {
 		updateLineNumbers();
 		validateExpression();
 	});
 
-	editor.addEventListener('scroll', function() {
+	editor.addEventListener("scroll", function () {
 		lineNumbers.scrollTop = editor.scrollTop;
 	});
 
@@ -521,9 +533,11 @@ document.addEventListener("DOMContentLoaded", function() {
 function updateLineNumbers() {
 	const editor = document.getElementById("editor");
 	const lineNumbers = document.getElementById("lineNumbers");
-	const lines = editor.value.split('\n').length;
-	lineNumbers.innerHTML = Array.from({length: lines}, (_, i) => i + 1).join('\n');
-	document.getElementById('lineCount').textContent = lines;
+	const lines = editor.value.split("\n").length;
+	lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join(
+		"\n",
+	);
+	document.getElementById("lineCount").textContent = lines;
 }
 
 function validateExpression() {
@@ -538,7 +552,7 @@ function validateExpression() {
 				<span>Enter code to validate...</span>
 			</div>
 		`;
-		updateStats(0, 0, 'Ready');
+		updateStats(0, 0, "Ready");
 		hidePathwayPanel();
 		return;
 	}
@@ -567,7 +581,12 @@ function validateExpression() {
 	//-- Display results
 	displayResults(errors, warnings);
 
-	const status = errors.length > 0 ? 'Invalid' : warnings.length > 0 ? 'Valid (with warnings)' : 'Valid';
+	const status =
+		errors.length > 0
+			? "Invalid"
+			: warnings.length > 0
+				? "Valid (with warnings)"
+				: "Valid";
 	updateStats(errors.length, warnings.length, status);
 
 	//-- Generate pathway analysis if no critical errors
@@ -581,7 +600,7 @@ function validateExpression() {
 function checkBrackets(code) {
 	const errors = [];
 	const stack = [];
-	const lines = code.split('\n');
+	const lines = code.split("\n");
 
 	let lineNum = 0;
 	let charNum = 0;
@@ -589,7 +608,7 @@ function checkBrackets(code) {
 	for (let i = 0; i < code.length; i++) {
 		const char = code[i];
 
-		if (char === '\n') {
+		if (char === "\n") {
 			lineNum++;
 			charNum = 0;
 			continue;
@@ -597,17 +616,18 @@ function checkBrackets(code) {
 
 		charNum++;
 
-		if (char === '(') {
-			stack.push({ char: '(', line: lineNum, col: charNum, index: i });
-		} else if (char === ')') {
+		if (char === "(") {
+			stack.push({ char: "(", line: lineNum, col: charNum, index: i });
+		} else if (char === ")") {
 			if (stack.length === 0) {
 				errors.push({
-					type: 'Bracket Error',
+					type: "Bracket Error",
 					line: lineNum + 1,
 					col: charNum,
 					message: 'Closing bracket ")" has no matching opening bracket',
 					context: getContext(code, i, lines, lineNum),
-					suggestion: 'Add an opening bracket "(" before this closing bracket, or remove this closing bracket'
+					suggestion:
+						'Add an opening bracket "(" before this closing bracket, or remove this closing bracket',
 				});
 			} else {
 				stack.pop();
@@ -619,12 +639,12 @@ function checkBrackets(code) {
 	while (stack.length > 0) {
 		const unclosed = stack.pop();
 		errors.push({
-			type: 'Bracket Error',
+			type: "Bracket Error",
 			line: unclosed.line + 1,
 			col: unclosed.col,
 			message: 'Opening bracket "(" has no matching closing bracket',
 			context: getContext(code, unclosed.index, lines, unclosed.line),
-			suggestion: 'Add a closing bracket ")" to match this opening bracket'
+			suggestion: 'Add a closing bracket ")" to match this opening bracket',
 		});
 	}
 
@@ -634,7 +654,7 @@ function checkBrackets(code) {
 function checkQuotes(code) {
 	const errors = [];
 	const warnings = [];
-	const lines = code.split('\n');
+	const lines = code.split("\n");
 
 	for (let lineNum = 0; lineNum < lines.length; lineNum++) {
 		const line = lines[lineNum];
@@ -647,26 +667,31 @@ function checkQuotes(code) {
 			//-- Check if line contains complete quoted strings with apostrophes inside
 			const quotedStringsWithApostrophes = line.match(/'[^']*'[^']*'/g);
 
-			if (quotedStringsWithApostrophes && quotedStringsWithApostrophes.length > 0) {
+			if (
+				quotedStringsWithApostrophes &&
+				quotedStringsWithApostrophes.length > 0
+			) {
 				//-- This is a string with an apostrophe inside - just warn
 				warnings.push({
-					type: 'Quote Warning',
+					type: "Quote Warning",
 					line: lineNum + 1,
 					col: 1,
-					message: "Line contains apostrophes within strings (e.g., \"Jobseeker's Allowance\") - verify quotes are balanced",
+					message:
+						'Line contains apostrophes within strings (e.g., "Jobseeker\'s Allowance") - verify quotes are balanced',
 					context: line,
-					suggestion: "If your parser handles apostrophes within single-quoted strings, this is fine. Otherwise, consider escaping or using double quotes."
+					suggestion:
+						"If your parser handles apostrophes within single-quoted strings, this is fine. Otherwise, consider escaping or using double quotes.",
 				});
 			} else {
 				//-- Likely a real unclosed string
 				const firstQuote = line.indexOf("'");
 				errors.push({
-					type: 'Quote Error',
+					type: "Quote Error",
 					line: lineNum + 1,
 					col: firstQuote + 1,
-					message: 'Odd number of quotes detected - possible unclosed string',
+					message: "Odd number of quotes detected - possible unclosed string",
 					context: line,
-					suggestion: "Add a closing single quote ' to match the opening quote"
+					suggestion: "Add a closing single quote ' to match the opening quote",
 				});
 			}
 		}
@@ -678,7 +703,7 @@ function checkQuotes(code) {
 function checkOperators(code) {
 	const errors = [];
 	const warnings = [];
-	const lines = code.split('\n');
+	const lines = code.split("\n");
 
 	for (let lineNum = 0; lineNum < lines.length; lineNum++) {
 		const line = lines[lineNum];
@@ -690,12 +715,12 @@ function checkOperators(code) {
 			//-- Skip if it's inside a string
 			if (!isInsideString(line, match.index)) {
 				errors.push({
-					type: 'Operator Error',
+					type: "Operator Error",
 					line: lineNum + 1,
 					col: match.index + 1,
 					message: 'Single "=" found - did you mean "==" for comparison?',
 					context: line,
-					suggestion: 'Use "==" for equality comparison, not "="'
+					suggestion: 'Use "==" for equality comparison, not "="',
 				});
 			}
 		}
@@ -703,23 +728,23 @@ function checkOperators(code) {
 		//-- Check for double && or ||
 		if (/&&\s*&&/.test(line)) {
 			errors.push({
-				type: 'Operator Error',
+				type: "Operator Error",
 				line: lineNum + 1,
-				col: line.indexOf('&&'),
+				col: line.indexOf("&&"),
 				message: 'Double AND operator "&&&&" found',
 				context: line,
-				suggestion: 'Remove one of the && operators'
+				suggestion: "Remove one of the && operators",
 			});
 		}
 
 		if (/\|\|\s*\|\|/.test(line)) {
 			errors.push({
-				type: 'Operator Error',
+				type: "Operator Error",
 				line: lineNum + 1,
-				col: line.indexOf('||'),
+				col: line.indexOf("||"),
 				message: 'Double OR operator "||||" found',
 				context: line,
-				suggestion: 'Remove one of the || operators'
+				suggestion: "Remove one of the || operators",
 			});
 		}
 
@@ -729,12 +754,13 @@ function checkOperators(code) {
 		while ((match = singleAnd.exec(line)) !== null) {
 			if (!isInsideString(line, match.index)) {
 				warnings.push({
-					type: 'Operator Warning',
+					type: "Operator Warning",
 					line: lineNum + 1,
 					col: match.index + 1,
 					message: 'Single "&" found - did you mean "&&" for logical AND?',
 					context: line,
-					suggestion: 'Use "&&" for logical AND operator. Single "&" is a bitwise operator in C#.'
+					suggestion:
+						'Use "&&" for logical AND operator. Single "&" is a bitwise operator in C#.',
 				});
 			}
 		}
@@ -744,12 +770,13 @@ function checkOperators(code) {
 		while ((match = singleOr.exec(line)) !== null) {
 			if (!isInsideString(line, match.index)) {
 				warnings.push({
-					type: 'Operator Warning',
+					type: "Operator Warning",
 					line: lineNum + 1,
 					col: match.index + 1,
 					message: 'Single "|" found - did you mean "||" for logical OR?',
 					context: line,
-					suggestion: 'Use "||" for logical OR operator. Single "|" is a bitwise operator in C#.'
+					suggestion:
+						'Use "||" for logical OR operator. Single "|" is a bitwise operator in C#.',
 				});
 			}
 		}
@@ -757,23 +784,23 @@ function checkOperators(code) {
 		//-- Check for triple &&& or |||
 		if (/&&&/.test(line)) {
 			errors.push({
-				type: 'Operator Error',
+				type: "Operator Error",
 				line: lineNum + 1,
-				col: line.indexOf('&&&'),
+				col: line.indexOf("&&&"),
 				message: 'Triple AND operator "&&&" found',
 				context: line,
-				suggestion: 'Use "&&" for logical AND'
+				suggestion: 'Use "&&" for logical AND',
 			});
 		}
 
 		if (/\|\|\|/.test(line)) {
 			errors.push({
-				type: 'Operator Error',
+				type: "Operator Error",
 				line: lineNum + 1,
-				col: line.indexOf('|||'),
+				col: line.indexOf("|||"),
 				message: 'Triple OR operator "|||" found',
 				context: line,
-				suggestion: 'Use "||" for logical OR'
+				suggestion: 'Use "||" for logical OR',
 			});
 		}
 
@@ -782,12 +809,13 @@ function checkOperators(code) {
 			const doubleNotIndex = line.search(/!\s*!/);
 			if (!isInsideString(line, doubleNotIndex)) {
 				warnings.push({
-					type: 'Operator Warning',
+					type: "Operator Warning",
 					line: lineNum + 1,
 					col: doubleNotIndex + 1,
 					message: 'Double negation "!!" found',
 					context: line,
-					suggestion: 'Double negation (!!) cancels out. Consider simplifying or verifying this is intentional.'
+					suggestion:
+						"Double negation (!!) cancels out. Consider simplifying or verifying this is intentional.",
 				});
 			}
 		}
@@ -797,16 +825,18 @@ function checkOperators(code) {
 		while ((match = xorOperator.exec(line)) !== null) {
 			if (!isInsideString(line, match.index)) {
 				//-- Make sure it's not part of a string or variable name
-				const prevChar = match.index > 0 ? line[match.index - 1] : ' ';
-				const nextChar = match.index < line.length - 1 ? line[match.index + 1] : ' ';
+				const prevChar = match.index > 0 ? line[match.index - 1] : " ";
+				const nextChar =
+					match.index < line.length - 1 ? line[match.index + 1] : " ";
 				if (!/[a-zA-Z0-9_]/.test(prevChar) && !/[a-zA-Z0-9_]/.test(nextChar)) {
 					warnings.push({
-						type: 'Operator Warning',
+						type: "Operator Warning",
 						line: lineNum + 1,
 						col: match.index + 1,
 						message: 'XOR operator "^" found',
 						context: line,
-						suggestion: 'The "^" operator is XOR (exclusive OR) in C#. Verify this is the intended logical operation.'
+						suggestion:
+							'The "^" operator is XOR (exclusive OR) in C#. Verify this is the intended logical operation.',
 					});
 				}
 			}
@@ -820,12 +850,13 @@ function checkOperators(code) {
 
 		if ((hasBitwiseAnd && hasLogicalAnd) || (hasBitwiseOr && hasLogicalOr)) {
 			errors.push({
-				type: 'Operator Error',
+				type: "Operator Error",
 				line: lineNum + 1,
 				col: 1,
-				message: 'Mixed bitwise and logical operators on same line',
+				message: "Mixed bitwise and logical operators on same line",
 				context: line,
-				suggestion: 'Mixing bitwise (&, |) and logical (&&, ||) operators can be confusing. Use consistent operators.'
+				suggestion:
+					"Mixing bitwise (&, |) and logical (&&, ||) operators can be confusing. Use consistent operators.",
 			});
 		}
 	}
@@ -835,7 +866,7 @@ function checkOperators(code) {
 
 function checkExpressions(code) {
 	const warnings = [];
-	const lines = code.split('\n');
+	const lines = code.split("\n");
 
 	for (let lineNum = 0; lineNum < lines.length; lineNum++) {
 		const line = lines[lineNum].trim();
@@ -843,14 +874,15 @@ function checkExpressions(code) {
 		//-- Check for lines ending with operators
 		if (/(\|\||&&)$/.test(line) && lineNum < lines.length - 1) {
 			const nextLine = lines[lineNum + 1].trim();
-			if (nextLine === '' || nextLine.startsWith(')')) {
+			if (nextLine === "" || nextLine.startsWith(")")) {
 				warnings.push({
-					type: 'Expression Warning',
+					type: "Expression Warning",
 					line: lineNum + 1,
 					col: line.length,
-					message: 'Logical operator at end of line with no following expression',
+					message:
+						"Logical operator at end of line with no following expression",
 					context: line,
-					suggestion: 'Ensure there is a valid expression after this operator'
+					suggestion: "Ensure there is a valid expression after this operator",
 				});
 			}
 		}
@@ -858,24 +890,24 @@ function checkExpressions(code) {
 		//-- Check for empty parentheses
 		if (/\(\s*\)/.test(line)) {
 			warnings.push({
-				type: 'Expression Warning',
+				type: "Expression Warning",
 				line: lineNum + 1,
-				col: line.indexOf('('),
-				message: 'Empty parentheses found',
+				col: line.indexOf("("),
+				message: "Empty parentheses found",
 				context: line,
-				suggestion: 'Remove empty parentheses or add an expression inside them'
+				suggestion: "Remove empty parentheses or add an expression inside them",
 			});
 		}
 
 		//-- Check for negation followed by operators
 		if (/!\s*(\|\||&&)/.test(line)) {
 			warnings.push({
-				type: 'Expression Warning',
+				type: "Expression Warning",
 				line: lineNum + 1,
-				col: line.indexOf('!'),
+				col: line.indexOf("!"),
 				message: 'Negation operator "!" followed directly by logical operator',
 				context: line,
-				suggestion: 'Add an expression after the ! operator'
+				suggestion: "Add an expression after the ! operator",
 			});
 		}
 	}
@@ -911,10 +943,10 @@ function displayResults(errors, warnings) {
 		return;
 	}
 
-	let html = '';
+	let html = "";
 
 	//-- Display errors first
-	errors.forEach(error => {
+	errors.forEach((error) => {
 		html += `
 			<div class="error-item">
 				<div class="error-header">
@@ -929,7 +961,7 @@ function displayResults(errors, warnings) {
 	});
 
 	//-- Then display warnings
-	warnings.forEach(warning => {
+	warnings.forEach((warning) => {
 		html += `
 			<div class="error-item warning">
 				<div class="error-header">
@@ -947,33 +979,34 @@ function displayResults(errors, warnings) {
 }
 
 function updateStats(errorCount, warningCount, status) {
-	document.getElementById('errorCount').textContent = errorCount;
-	document.getElementById('warningCount').textContent = warningCount;
+	document.getElementById("errorCount").textContent = errorCount;
+	document.getElementById("warningCount").textContent = warningCount;
 
-	const statusElement = document.getElementById('status');
+	const statusElement = document.getElementById("status");
 	statusElement.textContent = status;
-	statusElement.className = 'stat-value';
+	statusElement.className = "stat-value";
 
-	if (status === 'Invalid') {
-		statusElement.classList.add('error');
-	} else if (status === 'Valid (with warnings)') {
-		statusElement.classList.add('warning');
+	if (status === "Invalid") {
+		statusElement.classList.add("error");
+	} else if (status === "Valid (with warnings)") {
+		statusElement.classList.add("warning");
 	} else {
-		statusElement.classList.add('success');
+		statusElement.classList.add("success");
 	}
 }
 
 function escapeHtml(text) {
-	return text.replace(/&/g, '&amp;')
-				.replace(/</g, '&lt;')
-				.replace(/>/g, '&gt;')
-				.replace(/"/g, '&quot;')
-				.replace(/'/g, '&#039;');
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
 }
 
 function clearEditor() {
 	const editor = document.getElementById("editor");
-	editor.value = '';
+	editor.value = "";
 	updateLineNumbers();
 	validateExpression();
 	hidePathwayPanel();
@@ -1021,14 +1054,14 @@ PartnerWorkStatus == 'Employed'
 
 function analyzePathways(code) {
 	//-- Remove newlines and extra spaces for easier parsing
-	const cleanCode = code.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+	const cleanCode = code.replace(/\n/g, " ").replace(/\s+/g, " ").trim();
 
 	try {
 		const tree = parseExpression(cleanCode);
 		displayPathwayTree(tree);
 		showPathwayPanel();
 	} catch (e) {
-		console.error('Error parsing pathways:', e);
+		console.error("Error parsing pathways:", e);
 		hidePathwayPanel();
 	}
 }
@@ -1037,18 +1070,21 @@ function parseExpression(expr) {
 	expr = expr.trim();
 
 	//-- Split by top-level && operators
-	const andParts = splitByTopLevel(expr, '&&');
+	const andParts = splitByTopLevel(expr, "&&");
 
 	if (andParts.length > 1) {
 		//-- Multiple AND conditions
-		const children = andParts.map(part => parseExpression(part));
+		const children = andParts.map((part) => parseExpression(part));
 
 		//-- Separate preconditions from main pathways
 		const preconditions = [];
 		const mainLogic = [];
 
-		children.forEach(child => {
-			if (child.type === 'or' || (child.type === 'group' && hasOrOperator(child.expression))) {
+		children.forEach((child) => {
+			if (
+				child.type === "or" ||
+				(child.type === "group" && hasOrOperator(child.expression))
+			) {
 				mainLogic.push(child);
 			} else {
 				preconditions.push(child);
@@ -1056,62 +1092,62 @@ function parseExpression(expr) {
 		});
 
 		return {
-			type: 'and',
+			type: "and",
 			children: children,
 			preconditions: preconditions,
 			mainLogic: mainLogic,
-			expression: expr
+			expression: expr,
 		};
 	}
 
 	//-- Split by top-level || operators
-	const orParts = splitByTopLevel(expr, '||');
+	const orParts = splitByTopLevel(expr, "||");
 
 	if (orParts.length > 1) {
 		return {
-			type: 'or',
-			children: orParts.map(part => parseExpression(part)),
-			expression: expr
+			type: "or",
+			children: orParts.map((part) => parseExpression(part)),
+			expression: expr,
 		};
 	}
 
 	//-- Handle grouped expressions
-	if (expr.startsWith('(') && expr.endsWith(')')) {
+	if (expr.startsWith("(") && expr.endsWith(")")) {
 		const inner = expr.slice(1, -1);
 		return {
-			type: 'group',
+			type: "group",
 			child: parseExpression(inner),
-			expression: inner
+			expression: inner,
 		};
 	}
 
 	//-- Leaf node (simple condition)
 	return {
-		type: 'condition',
-		expression: expr
+		type: "condition",
+		expression: expr,
 	};
 }
 
 function splitByTopLevel(expr, operator) {
 	const parts = [];
-	let current = '';
+	let current = "";
 	let depth = 0;
 	let i = 0;
 
 	while (i < expr.length) {
 		const char = expr[i];
 
-		if (char === '(') {
+		if (char === "(") {
 			depth++;
 			current += char;
-		} else if (char === ')') {
+		} else if (char === ")") {
 			depth--;
 			current += char;
 		} else if (depth === 0 && expr.slice(i, i + operator.length) === operator) {
 			if (current.trim()) {
 				parts.push(current.trim());
 			}
-			current = '';
+			current = "";
 			i += operator.length - 1;
 		} else {
 			current += char;
@@ -1130,9 +1166,9 @@ function splitByTopLevel(expr, operator) {
 function hasOrOperator(expr) {
 	let depth = 0;
 	for (let i = 0; i < expr.length - 1; i++) {
-		if (expr[i] === '(') depth++;
-		else if (expr[i] === ')') depth--;
-		else if (depth === 0 && expr[i] === '|' && expr[i + 1] === '|') {
+		if (expr[i] === "(") depth++;
+		else if (expr[i] === ")") depth--;
+		else if (depth === 0 && expr[i] === "|" && expr[i + 1] === "|") {
 			return true;
 		}
 	}
@@ -1140,41 +1176,44 @@ function hasOrOperator(expr) {
 }
 
 function displayPathwayTree(tree) {
-	const pathwayTree = document.getElementById('pathwayTree');
-	let html = '';
+	const pathwayTree = document.getElementById("pathwayTree");
+	let html = "";
 
-	if (tree.type === 'and' && tree.preconditions.length > 0) {
+	if (tree.type === "and" && tree.preconditions.length > 0) {
 		//-- Display preconditions first
 		html += '<div class="tree-node">';
 		html += '<div class="node-content">';
 		html += '<span class="node-icon">📋</span>';
 		html += '<span class="node-label precondition">PRECONDITIONS</span>';
-		html += '<div class="node-expression">These conditions must ALL be true:</div>';
-		html += '</div>';
+		html +=
+			'<div class="node-expression">These conditions must ALL be true:</div>';
+		html += "</div>";
 		html += '<div class="node-children">';
-		tree.preconditions.forEach(precond => {
-			html += renderNode(precond, 'precondition');
+		tree.preconditions.forEach((precond) => {
+			html += renderNode(precond, "precondition");
 		});
-		html += '</div>';
-		html += '</div>';
+		html += "</div>";
+		html += "</div>";
 
 		//-- Display main pathways
 		if (tree.mainLogic.length > 0) {
 			const pathwayCount = countPathways(tree.mainLogic);
-			document.getElementById('pathwayCount').textContent = `${pathwayCount} pathway${pathwayCount !== 1 ? 's' : ''}`;
+			document.getElementById("pathwayCount").textContent =
+				`${pathwayCount} pathway${pathwayCount !== 1 ? "s" : ""}`;
 
 			html += '<div class="tree-node" style="margin-top: var(--spacing-lg);">';
 			html += '<div class="node-content">';
 			html += '<span class="node-icon">🔀</span>';
 			html += '<span class="node-label or">THEN ONE OF</span>';
-			html += '<div class="node-expression">At least ONE of these pathways must be satisfied:</div>';
-			html += '</div>';
+			html +=
+				'<div class="node-expression">At least ONE of these pathways must be satisfied:</div>';
+			html += "</div>";
 			html += '<div class="node-children">';
 			tree.mainLogic.forEach((pathway, index) => {
-				html += renderNode(pathway, 'pathway', index + 1);
+				html += renderNode(pathway, "pathway", index + 1);
 			});
-			html += '</div>';
-			html += '</div>';
+			html += "</div>";
+			html += "</div>";
 		}
 	} else {
 		html += renderNode(tree);
@@ -1183,32 +1222,33 @@ function displayPathwayTree(tree) {
 	pathwayTree.innerHTML = html;
 }
 
-function renderNode(node, context = '', pathwayNum = null) {
+function renderNode(node, context = "", pathwayNum = null) {
 	let html = '<div class="tree-node">';
 
-	if (node.type === 'and') {
+	if (node.type === "and") {
 		html += '<div class="node-content">';
 		html += '<span class="node-icon">➕</span>';
 		html += '<span class="node-label and">AND</span>';
 		html += '<div class="node-expression">All of these must be true:</div>';
-		html += '</div>';
+		html += "</div>";
 		html += '<div class="node-children">';
-		node.children.forEach(child => {
+		node.children.forEach((child) => {
 			html += renderNode(child, context);
 		});
-		html += '</div>';
-	} else if (node.type === 'or') {
+		html += "</div>";
+	} else if (node.type === "or") {
 		html += '<div class="node-content">';
 		html += '<span class="node-icon">🔀</span>';
 		html += '<span class="node-label or">OR</span>';
-		html += '<div class="node-expression">At least one of these must be true:</div>';
-		html += '</div>';
+		html +=
+			'<div class="node-expression">At least one of these must be true:</div>';
+		html += "</div>";
 		html += '<div class="node-children">';
-		node.children.forEach(child => {
+		node.children.forEach((child) => {
 			html += renderNode(child, context);
 		});
-		html += '</div>';
-	} else if (node.type === 'group') {
+		html += "</div>";
+	} else if (node.type === "group") {
 		return renderNode(node.child, context, pathwayNum);
 	} else {
 		//-- Leaf condition
@@ -1216,7 +1256,7 @@ function renderNode(node, context = '', pathwayNum = null) {
 		const displayExpr = formatExpression(expr);
 
 		html += '<div class="node-content">';
-		if (context === 'pathway' && pathwayNum) {
+		if (context === "pathway" && pathwayNum) {
 			html += `<span class="node-icon">🎯</span>`;
 			html += `<span class="node-label pathway">PATH ${pathwayNum}</span>`;
 		} else {
@@ -1224,33 +1264,55 @@ function renderNode(node, context = '', pathwayNum = null) {
 		}
 		html += `<div class="node-expression">`;
 		html += displayExpr;
-		html += '</div>';
-		html += '</div>';
+		html += "</div>";
+		html += "</div>";
 	}
 
-	html += '</div>';
+	html += "</div>";
 	return html;
 }
 
 function formatExpression(expr) {
 	//-- Escape HTML entities first to prevent XSS
-	expr = expr.replace(/&/g, '&amp;')
-				.replace(/</g, '&lt;')
-				.replace(/>/g, '&gt;');
+	expr = expr
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;");
 
 	//-- Add syntax highlighting to expressions
 	let formatted = expr;
 
 	//-- Highlight operators with better spacing and line breaks for long expressions
-	formatted = formatted.replace(/&amp;&amp;/g, '\n<span style="color: var(--color-warning); font-weight: bold;">AND</span> ');
-	formatted = formatted.replace(/\|\|/g, '\n<span style="color: #9b59b6; font-weight: bold;">OR</span> ');
-	formatted = formatted.replace(/!=/g, ' <span style="color: var(--color-danger);">≠</span> ');
-	formatted = formatted.replace(/==/g, ' <span style="color: var(--color-success);">=</span> ');
-	formatted = formatted.replace(/(&lt;=|&gt;=|&lt;|&gt;)/g, ' <span style="color: var(--color-primary);">$1</span> ');
+	formatted = formatted.replace(
+		/&amp;&amp;/g,
+		'\n<span style="color: var(--color-warning); font-weight: bold;">AND</span> ',
+	);
+	formatted = formatted.replace(
+		/\|\|/g,
+		'\n<span style="color: #9b59b6; font-weight: bold;">OR</span> ',
+	);
+	formatted = formatted.replace(
+		/!=/g,
+		' <span style="color: var(--color-danger);">≠</span> ',
+	);
+	formatted = formatted.replace(
+		/==/g,
+		' <span style="color: var(--color-success);">=</span> ',
+	);
+	formatted = formatted.replace(
+		/(&lt;=|&gt;=|&lt;|&gt;)/g,
+		' <span style="color: var(--color-primary);">$1</span> ',
+	);
 
 	//-- Highlight negation
-	formatted = formatted.replace(/^!([a-zA-Z])/g, '<span style="color: var(--color-danger); font-weight: bold;">NOT</span> $1');
-	formatted = formatted.replace(/\s!([a-zA-Z])/g, ' <span style="color: var(--color-danger); font-weight: bold;">NOT</span> $1');
+	formatted = formatted.replace(
+		/^!([a-zA-Z])/g,
+		'<span style="color: var(--color-danger); font-weight: bold;">NOT</span> $1',
+	);
+	formatted = formatted.replace(
+		/\s!([a-zA-Z])/g,
+		' <span style="color: var(--color-danger); font-weight: bold;">NOT</span> $1',
+	);
 
 	//-- Trim extra whitespace but preserve line breaks
 	formatted = formatted.trim();
@@ -1260,8 +1322,8 @@ function formatExpression(expr) {
 
 function countPathways(nodes) {
 	let count = 0;
-	nodes.forEach(node => {
-		if (node.type === 'or') {
+	nodes.forEach((node) => {
+		if (node.type === "or") {
 			count += node.children.length;
 		} else {
 			count += 1;
@@ -1271,16 +1333,16 @@ function countPathways(nodes) {
 }
 
 function showPathwayPanel() {
-	const panel = document.getElementById('pathwayPanel');
+	const panel = document.getElementById("pathwayPanel");
 	if (panel) {
-		panel.classList.add('visible');
+		panel.classList.add("visible");
 	}
 }
 
 function hidePathwayPanel() {
-	const panel = document.getElementById('pathwayPanel');
+	const panel = document.getElementById("pathwayPanel");
 	if (panel) {
-		panel.classList.remove('visible');
+		panel.classList.remove("visible");
 	}
 }
 
@@ -1289,27 +1351,29 @@ function hidePathwayPanel() {
 function openSaveVersionModal() {
 	const editor = document.getElementById("editor");
 	if (!editor.value.trim()) {
-		alert('Please enter some code before saving a version.');
+		alert("Please enter some code before saving a version.");
 		return;
 	}
-	document.getElementById('saveVersionModal').classList.add('active');
-	document.getElementById('versionName').value = '';
-	document.getElementById('versionDescription').value = '';
-	document.getElementById('versionName').focus();
+	document.getElementById("saveVersionModal").classList.add("active");
+	document.getElementById("versionName").value = "";
+	document.getElementById("versionDescription").value = "";
+	document.getElementById("versionName").focus();
 }
 
 function closeSaveVersionModal() {
-	document.getElementById('saveVersionModal').classList.remove('active');
+	document.getElementById("saveVersionModal").classList.remove("active");
 }
 
 function saveVersion() {
 	const editor = document.getElementById("editor");
-	const name = document.getElementById('versionName').value.trim();
-	const description = document.getElementById('versionDescription').value.trim();
+	const name = document.getElementById("versionName").value.trim();
+	const description = document
+		.getElementById("versionDescription")
+		.value.trim();
 	const code = editor.value;
 
 	if (!name) {
-		alert('Please enter a version name.');
+		alert("Please enter a version name.");
 		return;
 	}
 
@@ -1319,11 +1383,14 @@ function saveVersion() {
 		description: description,
 		code: code,
 		timestamp: new Date().toISOString(),
-		dateFormatted: new Date().toLocaleString()
+		dateFormatted: new Date().toLocaleString(),
 	};
 
 	window.savedVersions.unshift(version);
-	localStorage.setItem('logicValidatorVersions', JSON.stringify(window.savedVersions));
+	localStorage.setItem(
+		"logicValidatorVersions",
+		JSON.stringify(window.savedVersions),
+	);
 
 	closeSaveVersionModal();
 	renderVersionsList();
@@ -1331,7 +1398,7 @@ function saveVersion() {
 
 function loadVersion(id) {
 	const editor = document.getElementById("editor");
-	const version = window.savedVersions.find(v => v.id === id);
+	const version = window.savedVersions.find((v) => v.id === id);
 	if (version) {
 		editor.value = version.code;
 		updateLineNumbers();
@@ -1340,46 +1407,50 @@ function loadVersion(id) {
 }
 
 function deleteVersion(id) {
-	if (confirm('Are you sure you want to delete this version?')) {
-		window.savedVersions = window.savedVersions.filter(v => v.id !== id);
-		localStorage.setItem('logicValidatorVersions', JSON.stringify(window.savedVersions));
+	if (confirm("Are you sure you want to delete this version?")) {
+		window.savedVersions = window.savedVersions.filter((v) => v.id !== id);
+		localStorage.setItem(
+			"logicValidatorVersions",
+			JSON.stringify(window.savedVersions),
+		);
 		renderVersionsList();
 	}
 }
 
 function compareVersions(id) {
 	const editor = document.getElementById("editor");
-	const version = window.savedVersions.find(v => v.id === id);
+	const version = window.savedVersions.find((v) => v.id === id);
 	if (!version) return;
 
 	const currentCode = editor.value;
 	const versionCode = version.code;
 
-	showComparison(currentCode, versionCode, 'Current Code', version.name);
+	showComparison(currentCode, versionCode, "Current Code", version.name);
 }
 
 function renderVersionsList() {
-	const versionsList = document.getElementById('versionsList');
-	const versionCount = document.getElementById('versionCount');
+	const versionsList = document.getElementById("versionsList");
+	const versionCount = document.getElementById("versionCount");
 
 	if (!versionsList || !versionCount) return;
 
 	versionCount.textContent = `${window.savedVersions.length} saved`;
 
 	if (window.savedVersions.length === 0) {
-		versionsList.innerHTML = '<div class="no-versions">No versions saved yet. Click "Save Version" to save the current expression.</div>';
+		versionsList.innerHTML =
+			'<div class="no-versions">No versions saved yet. Click "Save Version" to save the current expression.</div>';
 		return;
 	}
 
-	let html = '';
-	window.savedVersions.forEach(version => {
+	let html = "";
+	window.savedVersions.forEach((version) => {
 		html += `
 			<div class="version-item">
 				<div class="version-info">
 					<div class="version-name">${escapeHtml(version.name)}</div>
 					<div class="version-meta">
 						${version.dateFormatted}
-						${version.description ? ' • ' + escapeHtml(version.description) : ''}
+						${version.description ? " • " + escapeHtml(version.description) : ""}
 					</div>
 				</div>
 				<div class="version-actions">
@@ -1396,45 +1467,50 @@ function renderVersionsList() {
 
 //-- === COMPARISON FUNCTIONS ===
 
-function showComparison(codeA, codeB, titleA = 'Version A', titleB = 'Version B') {
-	document.getElementById('comparisonLeftTitle').textContent = titleA;
-	document.getElementById('comparisonRightTitle').textContent = titleB;
+function showComparison(
+	codeA,
+	codeB,
+	titleA = "Version A",
+	titleB = "Version B",
+) {
+	document.getElementById("comparisonLeftTitle").textContent = titleA;
+	document.getElementById("comparisonRightTitle").textContent = titleB;
 
 	const diff = computeDiff(codeA, codeB);
-	document.getElementById('comparisonLeft').innerHTML = diff.left;
-	document.getElementById('comparisonRight').innerHTML = diff.right;
+	document.getElementById("comparisonLeft").innerHTML = diff.left;
+	document.getElementById("comparisonRight").innerHTML = diff.right;
 
-	document.getElementById('comparisonView').classList.add('active');
+	document.getElementById("comparisonView").classList.add("active");
 }
 
 function closeComparison() {
-	document.getElementById('comparisonView').classList.remove('active');
+	document.getElementById("comparisonView").classList.remove("active");
 }
 
 function computeDiff(codeA, codeB) {
-	const linesA = codeA.split('\n');
-	const linesB = codeB.split('\n');
+	const linesA = codeA.split("\n");
+	const linesB = codeB.split("\n");
 
-	let leftHtml = '';
-	let rightHtml = '';
+	let leftHtml = "";
+	let rightHtml = "";
 
 	const maxLines = Math.max(linesA.length, linesB.length);
 
 	for (let i = 0; i < maxLines; i++) {
-		const lineA = linesA[i] !== undefined ? linesA[i] : '';
-		const lineB = linesB[i] !== undefined ? linesB[i] : '';
+		const lineA = linesA[i] !== undefined ? linesA[i] : "";
+		const lineB = linesB[i] !== undefined ? linesB[i] : "";
 
 		if (lineA === lineB) {
 			//-- Same line
-			leftHtml += escapeHtml(lineA) + '\n';
-			rightHtml += escapeHtml(lineB) + '\n';
+			leftHtml += escapeHtml(lineA) + "\n";
+			rightHtml += escapeHtml(lineB) + "\n";
 		} else {
 			//-- Different lines
 			if (lineA && !lineB) {
 				leftHtml += `<span class="diff-removed">${escapeHtml(lineA)}</span>\n`;
-				rightHtml += '\n';
+				rightHtml += "\n";
 			} else if (!lineA && lineB) {
-				leftHtml += '\n';
+				leftHtml += "\n";
 				rightHtml += `<span class="diff-added">${escapeHtml(lineB)}</span>\n`;
 			} else {
 				//-- Both exist but different
@@ -1454,7 +1530,7 @@ function checkDuplicates() {
 	const code = editor.value;
 
 	if (!code.trim()) {
-		alert('Please enter some code to check for duplicates.');
+		alert("Please enter some code to check for duplicates.");
 		return;
 	}
 
@@ -1464,7 +1540,7 @@ function checkDuplicates() {
 
 function findDuplicates(code) {
 	//-- Normalize the code
-	const normalized = code.replace(/\s+/g, ' ').trim();
+	const normalized = code.replace(/\s+/g, " ").trim();
 
 	//-- Find repeated patterns (substrings that appear more than once)
 	const patterns = new Map();
@@ -1489,7 +1565,7 @@ function findDuplicates(code) {
 					patterns.set(substring, {
 						pattern: substring,
 						count: occurrences,
-						length: len
+						length: len,
 					});
 				}
 			}
@@ -1524,24 +1600,25 @@ function countOccurrences(str, substr) {
 }
 
 function displayDuplicates(duplicates) {
-	const resultsPanel = document.getElementById('duplicateResults');
+	const resultsPanel = document.getElementById("duplicateResults");
 
 	if (duplicates.length === 0) {
 		resultsPanel.innerHTML = `
 			<div class="duplicate-header">✅ No Significant Duplicates Found</div>
 			<p style="color: var(--color-gray-600);">Your code doesn't contain any repeated logic patterns.</p>
 		`;
-		resultsPanel.classList.add('visible');
+		resultsPanel.classList.add("visible");
 		return;
 	}
 
-	let html = `<div class="duplicate-header">⚠️ Found ${duplicates.length} Duplicate Pattern${duplicates.length > 1 ? 's' : ''}</div>`;
+	let html = `<div class="duplicate-header">⚠️ Found ${duplicates.length} Duplicate Pattern${duplicates.length > 1 ? "s" : ""}</div>`;
 
 	duplicates.forEach((dup, index) => {
 		//-- Format the pattern for display
-		const formatted = dup.pattern.length > 100
-			? dup.pattern.substr(0, 100) + '...'
-			: dup.pattern;
+		const formatted =
+			dup.pattern.length > 100
+				? dup.pattern.substr(0, 100) + "..."
+				: dup.pattern;
 
 		html += `
 			<div class="duplicate-item">
@@ -1555,5 +1632,5 @@ function displayDuplicates(duplicates) {
 	});
 
 	resultsPanel.innerHTML = html;
-	resultsPanel.classList.add('visible');
+	resultsPanel.classList.add("visible");
 }
