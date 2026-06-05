@@ -1537,17 +1537,12 @@ a:focus-visible {
     animation: fadeIn 0.6s ease-out;
 }
 
-.bc-header {
-    text-align: center;
-    padding: var(--spacing-xl) var(--spacing-2xl);
-    margin-bottom: var(--spacing-xl);
-}
-
 .bc-title {
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-xl);
     font-weight: 800;
     color: var(--color-gray-900);
-    margin-bottom: var(--spacing-sm);
+    margin: 0;
+    white-space: nowrap;
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1640,10 +1635,11 @@ a:focus-visible {
 
 /* Add Panel Bar */
 .add-panel-bar {
-    height: 85px;
     display: flex;
-    align-items: center;
-    padding: 0 var(--spacing-lg);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--spacing-md) var(--spacing-lg);
+    gap: var(--spacing-sm);
     margin-bottom: var(--spacing-xl);
 }
 
@@ -1651,7 +1647,7 @@ a:focus-visible {
     display: flex;
     align-items: center;
     width: 100%;
-    height: 100%;
+    height: 55px;
     gap: 0;
 }
 

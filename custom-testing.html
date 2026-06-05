@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -15,27 +15,25 @@
 	<body>
 		<div class="dashboard-container">
 			<!-- Navigation will be inserted here by JavaScript -->
-			
+
 			<!-- Main Content -->
 			<main class="main-content">
 				<!-- Custom Testing Header Section -->
 				<section class="bc-section">
-					<div class="bc-header glass">
-						<h1 class="bc-title">Portal Testing</h1>
-						<p class="bc-description">
-							Create and test multiple portal instances with custom configurations
-						</p>
-					</div>
-					
 					<!-- Add Panel Bar -->
 					<div class="add-panel-bar glass">
-						<form class="add-panel-form" onsubmit="return addiFrame(event)">
-
+						<h1 class="bc-title">Portal Testing</h1>
+						<form class="add-panel-form" onsubmit="return addiFrame(event);">
 							<div class="apf-group">
 								<span class="apf-label">Environment</span>
 								<div class="apf-segmented">
 									<label class="apf-seg-item">
-										<input type="radio" name="environment" value="uat" checked />
+										<input
+											type="radio"
+											name="environment"
+											value="uat"
+											checked
+										/>
 										<span>UAT</span>
 									</label>
 									<label class="apf-seg-item">
@@ -82,12 +80,11 @@
 								</div>
 							</div>
 
-							<button class="apf-add-btn" type="submit">+ Add Panel</button>
-
+							<button class="apf-add-btn" type="submit">+ Add iframe</button>
 						</form>
 					</div>
 				</section>
-				
+
 				<!-- iFrame Container -->
 				<div id="iframe-container" class="iframe-grid">
 					<!-- Dynamically created iframes will appear here -->
@@ -99,8 +96,8 @@
 		<script src="navigation.js"></script>
 		<script>
 			//-- Initialize navigation for Custom Testing page
-			document.addEventListener("DOMContentLoaded", function() {
-				initializeNavigation('custom-testing');
+			document.addEventListener("DOMContentLoaded", function () {
+				initializeNavigation("custom-testing");
 			});
 		</script>
 		<script
